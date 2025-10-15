@@ -18,6 +18,10 @@ This project implements a complete heart disease prediction system using various
 - ✅ Professional Streamlit UI for deployment
 - ✅ Model persistence using joblib
 - ✅ Detailed documentation and dataset description
+- ✅ Unit tests for code validation
+- ✅ CI/CD pipeline with GitHub Actions
+- ✅ Docker support for containerized deployment
+- ✅ Helper scripts for automation
 
 ## 📁 Project Structure
 
@@ -41,8 +45,27 @@ heart-disease-detector/
 ├── app/                          # Streamlit application
 │   └── streamlit_app.py          # Main application file
 │
+├── tests/                        # Unit tests
+│   ├── __init__.py
+│   └── test_app.py               # Application tests
+│
+├── .github/                      # GitHub Actions workflows
+│   └── workflows/
+│       └── ci.yml                # CI/CD pipeline
+│
+├── .streamlit/                   # Streamlit configuration
+│   └── config.toml               # App configuration
+│
 ├── requirements.txt              # Python dependencies
+├── requirements-dev.txt          # Development dependencies
+├── setup.py                      # Package setup
+├── Dockerfile                    # Docker image configuration
+├── docker-compose.yml            # Docker Compose configuration
 ├── .gitignore                    # Git ignore file
+├── .dockerignore                 # Docker ignore file
+├── run_app.sh                    # Application launcher script
+├── run_tests.sh                  # Test runner script
+├── train_models.sh               # Model training script
 └── README.md                     # This file
 ```
 
@@ -156,6 +179,44 @@ After training, the notebook displays detailed performance metrics including:
 - Model comparison charts
 
 The best performing model is automatically saved as `best_model.pkl`.
+
+## 🧪 Testing
+
+The project includes unit tests to verify functionality:
+
+```bash
+# Run all tests
+bash run_tests.sh
+
+# Or run tests manually
+python -m unittest discover -s tests -v
+```
+
+The tests verify:
+- Dataset structure and integrity
+- Model loading and functionality
+- Application imports and configuration
+
+For development testing, install additional dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+## 🐳 Docker Support
+
+Build and run with Docker:
+
+```bash
+# Build the image
+docker build -t heart-disease-predictor .
+
+# Run the container
+docker run -p 8501:8501 heart-disease-predictor
+
+# Or use docker-compose
+docker-compose up
+```
 
 ## 🌐 Deployment
 

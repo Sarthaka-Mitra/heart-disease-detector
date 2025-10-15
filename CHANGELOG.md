@@ -34,13 +34,35 @@ All notable changes to the Heart Disease Predictor project will be documented in
 - Helper scripts
   - train_models.sh for automated training
   - run_app.sh for launching the application
+  - run_tests.sh for running unit tests
 - Development setup
   - requirements.txt with all dependencies
+  - requirements-dev.txt for development tools
   - .gitignore for clean repository
   - MIT License
 - Data preprocessing and feature scaling
 - Model persistence using joblib
 - Exploratory Data Analysis (EDA) visualizations
+- **Unit Testing Framework**
+  - Test suite for dataset validation
+  - Model loading tests
+  - Application import tests
+  - Test runner script
+- **CI/CD Pipeline**
+  - GitHub Actions workflow
+  - Automated testing on push/PR
+  - Code quality checks
+  - Notebook execution validation
+- **Docker Support**
+  - Dockerfile for containerization
+  - docker-compose.yml for easy deployment
+  - .dockerignore for optimized builds
+- **Streamlit Configuration**
+  - Custom theme configuration
+  - Server settings for deployment
+- **Package Setup**
+  - setup.py for pip installation
+  - Package metadata and classifiers
 
 ### Features
 - Multi-model support with easy switching
