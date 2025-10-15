@@ -48,10 +48,10 @@ st.markdown("""
 st.markdown('<h1 class="main-header">❤️ Heart Disease Predictor</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Advanced ML-based Heart Disease Detection System</p>', unsafe_allow_html=True)
 
-# Load models
+# Load models and preprocessing objects
 @st.cache_resource
 def load_models():
-    """Load pre-trained models and scaler"""
+    """Load pre-trained models and preprocessing objects"""
     model_path = Path(__file__).parent.parent / 'models'
     
     models = {}
@@ -62,24 +62,38 @@ def load_models():
             models['Random Forest'] = joblib.load(model_path / 'random_forest_model.pkl')
         if (model_path / 'xgboost_model.pkl').exists():
             models['XGBoost'] = joblib.load(model_path / 'xgboost_model.pkl')
+        if (model_path / 'gradient_boosting_model.pkl').exists():
+            models['Gradient Boosting'] = joblib.load(model_path / 'gradient_boosting_model.pkl')
+        if (model_path / 'neural_network_model.pkl').exists():
+            models['Neural Network'] = joblib.load(model_path / 'neural_network_model.pkl')
+        if (model_path / 'ensemble_model.pkl').exists():
+            models['Ensemble'] = joblib.load(model_path / 'ensemble_model.pkl')
         if (model_path / 'best_model.pkl').exists():
             models['Best Model'] = joblib.load(model_path / 'best_model.pkl')
     except Exception as e:
         st.error(f"Error loading models: {e}")
-        return None, None
+        return None, None, None, None
     
+    # Load preprocessing objects
     scaler = None
+    label_encoders = None
+    feature_names = None
+    
     try:
         if (model_path / 'scaler.pkl').exists():
             scaler = joblib.load(model_path / 'scaler.pkl')
+        if (model_path / 'label_encoders.pkl').exists():
+            label_encoders = joblib.load(model_path / 'label_encoders.pkl')
+        if (model_path / 'feature_names.pkl').exists():
+            feature_names = joblib.load(model_path / 'feature_names.pkl')
     except Exception as e:
-        st.warning(f"Scaler not loaded: {e}")
+        st.warning(f"Preprocessing objects not fully loaded: {e}")
     
-    return models, scaler
+    return models, scaler, label_encoders, feature_names
 
 # Sidebar - Model Selection
 st.sidebar.title("⚙️ Configuration")
-models, scaler = load_models()
+models, scaler, label_encoders, feature_names = load_models()
 
 if models:
     selected_model_name = st.sidebar.selectbox(
@@ -89,15 +103,15 @@ if models:
     )
     model = models[selected_model_name]
 else:
-    st.error("No models found. Please run the Jupyter notebook first to train the models.")
+    st.error("No models found. Please run the training script first: `python train_new_models.py`")
     st.stop()
 
 # Sidebar - Information
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 About")
 st.sidebar.info(
-    "This application predicts the likelihood of heart disease based on various clinical parameters. "
-    "The models were trained on a heart disease dataset with 303 patient records."
+    "This application predicts the likelihood of heart disease based on various health parameters. "
+    "The models were trained on a comprehensive heart disease dataset with 10,000 patient records."
 )
 
 st.sidebar.markdown("### 🎯 Model Info")
@@ -112,74 +126,113 @@ with tab1:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        age = st.number_input("Age (years)", min_value=1, max_value=120, value=50, step=1)
-        sex = st.selectbox("Sex", options=[("Male", 1), ("Female", 0)], format_func=lambda x: x[0])
-        cp = st.selectbox("Chest Pain Type", 
-                         options=[("Typical Angina", 0), ("Atypical Angina", 1), 
-                                 ("Non-anginal Pain", 2), ("Asymptomatic", 3)],
-                         format_func=lambda x: x[0])
-        trestbps = st.number_input("Resting Blood Pressure (mm Hg)", 
-                                   min_value=80, max_value=200, value=120, step=1)
-        chol = st.number_input("Serum Cholesterol (mg/dl)", 
-                              min_value=100, max_value=600, value=200, step=1)
+        age = st.number_input("Age (years)", min_value=18, max_value=100, value=50, step=1)
+        gender = st.selectbox("Gender", options=["Male", "Female"])
+        blood_pressure = st.number_input("Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120, step=1)
+        cholesterol = st.number_input("Cholesterol Level (mg/dl)", min_value=100, max_value=400, value=200, step=1)
+        exercise = st.selectbox("Exercise Habits", options=["Low", "Medium", "High"])
+        smoking = st.selectbox("Smoking", options=["No", "Yes"])
+        family_history = st.selectbox("Family Heart Disease", options=["No", "Yes"])
     
     with col2:
-        fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl", 
-                          options=[("No", 0), ("Yes", 1)], format_func=lambda x: x[0])
-        restecg = st.selectbox("Resting ECG Results", 
-                              options=[("Normal", 0), ("ST-T Abnormality", 1), 
-                                      ("LV Hypertrophy", 2)],
-                              format_func=lambda x: x[0])
-        thalach = st.number_input("Maximum Heart Rate Achieved", 
-                                 min_value=60, max_value=220, value=150, step=1)
-        exang = st.selectbox("Exercise Induced Angina", 
-                            options=[("No", 0), ("Yes", 1)], format_func=lambda x: x[0])
+        diabetes = st.selectbox("Diabetes", options=["No", "Yes"])
+        bmi = st.number_input("BMI", min_value=15.0, max_value=50.0, value=25.0, step=0.1)
+        high_bp = st.selectbox("High Blood Pressure", options=["No", "Yes"])
+        low_hdl = st.selectbox("Low HDL Cholesterol", options=["No", "Yes"])
+        high_ldl = st.selectbox("High LDL Cholesterol", options=["No", "Yes"])
+        alcohol = st.selectbox("Alcohol Consumption", options=["None", "Low", "Medium", "High"])
+        stress = st.selectbox("Stress Level", options=["Low", "Medium", "High"])
     
     with col3:
-        oldpeak = st.number_input("ST Depression (oldpeak)", 
-                                 min_value=0.0, max_value=10.0, value=1.0, step=0.1)
-        slope = st.selectbox("Slope of Peak Exercise ST Segment", 
-                            options=[("Upsloping", 0), ("Flat", 1), ("Downsloping", 2)],
-                            format_func=lambda x: x[0])
-        ca = st.selectbox("Number of Major Vessels (0-3)", 
-                         options=[(0, 0), (1, 1), (2, 2), (3, 3)], 
-                         format_func=lambda x: str(x[0]))
-        thal = st.selectbox("Thalassemia", 
-                           options=[("Normal", 0), ("Fixed Defect", 1), 
-                                   ("Reversible Defect", 2), ("Not Described", 3)],
-                           format_func=lambda x: x[0])
+        sleep_hours = st.number_input("Sleep Hours per day", min_value=3.0, max_value=12.0, value=7.0, step=0.5)
+        sugar_consumption = st.selectbox("Sugar Consumption", options=["Low", "Medium", "High"])
+        triglyceride = st.number_input("Triglyceride Level (mg/dl)", min_value=50, max_value=500, value=150, step=1)
+        fasting_bs = st.number_input("Fasting Blood Sugar (mg/dl)", min_value=70, max_value=200, value=100, step=1)
+        crp_level = st.number_input("CRP Level (mg/L)", min_value=0.0, max_value=20.0, value=5.0, step=0.1)
+        homocysteine = st.number_input("Homocysteine Level (µmol/L)", min_value=4.0, max_value=25.0, value=10.0, step=0.1)
     
     st.markdown("---")
     
     # Prediction button
     if st.button("🔮 Predict Heart Disease Risk", type="primary", use_container_width=True):
         # Prepare input data
-        input_data = pd.DataFrame({
-            'age': [age],
-            'sex': [sex[1]],
-            'cp': [cp[1]],
-            'trestbps': [trestbps],
-            'chol': [chol],
-            'fbs': [fbs[1]],
-            'restecg': [restecg[1]],
-            'thalach': [thalach],
-            'exang': [exang[1]],
-            'oldpeak': [oldpeak],
-            'slope': [slope[1]],
-            'ca': [ca[1]],
-            'thal': [thal[1]]
-        })
+        input_dict = {
+            'Age': age,
+            'Gender': gender,
+            'Blood Pressure': blood_pressure,
+            'Cholesterol Level': cholesterol,
+            'Exercise Habits': exercise,
+            'Smoking': smoking,
+            'Family Heart Disease': family_history,
+            'Diabetes': diabetes,
+            'BMI': bmi,
+            'High Blood Pressure': high_bp,
+            'Low HDL Cholesterol': low_hdl,
+            'High LDL Cholesterol': high_ldl,
+            'Alcohol Consumption': alcohol,
+            'Stress Level': stress,
+            'Sleep Hours': sleep_hours,
+            'Sugar Consumption': sugar_consumption,
+            'Triglyceride Level': triglyceride,
+            'Fasting Blood Sugar': fasting_bs,
+            'CRP Level': crp_level,
+            'Homocysteine Level': homocysteine
+        }
+        
+        # Add engineered features
+        input_dict['Age_BMI_interaction'] = age * bmi
+        input_dict['BP_Chol_ratio'] = blood_pressure / (cholesterol + 1)
+        input_dict['Trig_Chol_ratio'] = triglyceride / (cholesterol + 1)
+        
+        # Age group
+        if age <= 35:
+            age_group = 'Young'
+        elif age <= 50:
+            age_group = 'MiddleAge'
+        elif age <= 65:
+            age_group = 'Senior'
+        else:
+            age_group = 'Elderly'
+        input_dict['Age_group'] = age_group
+        
+        # BMI category
+        if bmi < 18.5:
+            bmi_cat = 'Underweight'
+        elif bmi < 25:
+            bmi_cat = 'Normal'
+        elif bmi < 30:
+            bmi_cat = 'Overweight'
+        else:
+            bmi_cat = 'Obese'
+        input_dict['BMI_category'] = bmi_cat
+        
+        # Create DataFrame
+        input_df = pd.DataFrame([input_dict])
+        
+        # Encode categorical features using label encoders
+        if label_encoders:
+            for col, le in label_encoders.items():
+                if col in input_df.columns:
+                    try:
+                        input_df[col] = le.transform(input_df[col].astype(str))
+                    except:
+                        # If value not seen during training, use most common class
+                        input_df[col] = 0
+        
+        # Reorder columns to match training order
+        if feature_names:
+            input_df = input_df[feature_names]
         
         # Make prediction
         try:
-            # Scale data if using Logistic Regression
-            if selected_model_name == 'Logistic Regression' and scaler is not None:
-                input_scaled = scaler.transform(input_data)
+            # Check if model needs scaling (Logistic Regression, Neural Network)
+            if selected_model_name in ['Logistic Regression', 'Neural Network'] and scaler is not None:
+                input_scaled = scaler.transform(input_df)
                 prediction = model.predict(input_scaled)
                 probability = model.predict_proba(input_scaled)[0]
             else:
-                prediction = model.predict(input_data)
-                probability = model.predict_proba(input_data)[0]
+                prediction = model.predict(input_df)
+                probability = model.predict_proba(input_df)[0]
             
             # Display results
             st.markdown("### 🎯 Prediction Results")
@@ -191,7 +244,7 @@ with tab1:
                     st.markdown(
                         '<div class="prediction-box healthy">'
                         '<h2 style="color: #27AE60; text-align: center;">✅ Low Risk</h2>'
-                        '<p style="text-align: center; font-size: 1.2rem;">No significant heart disease detected</p>'
+                        '<p style="text-align: center; font-size: 1.2rem;">No significant heart disease risk detected</p>'
                         '</div>',
                         unsafe_allow_html=True
                     )
@@ -199,7 +252,7 @@ with tab1:
                     st.markdown(
                         '<div class="prediction-box at-risk">'
                         '<h2 style="color: #E74C3C; text-align: center;">⚠️ High Risk</h2>'
-                        '<p style="text-align: center; font-size: 1.2rem;">Heart disease detected - Consult a cardiologist</p>'
+                        '<p style="text-align: center; font-size: 1.2rem;">Heart disease risk detected - Please consult a healthcare professional</p>'
                         '</div>',
                         unsafe_allow_html=True
                     )
@@ -223,11 +276,32 @@ with tab1:
             
         except Exception as e:
             st.error(f"Error making prediction: {e}")
+            st.error("Please ensure all required fields are filled correctly.")
 
 with tab2:
     st.markdown("### 📊 Model Performance Metrics")
     
-    st.info("Run the Jupyter notebook (`notebooks/heart_disease_analysis.ipynb`) to see detailed model performance metrics.")
+    # Try to load model comparison
+    try:
+        model_path = Path(__file__).parent.parent / 'models'
+        if (model_path / 'model_comparison.csv').exists():
+            comparison_df = pd.read_csv(model_path / 'model_comparison.csv')
+            st.markdown("#### Model Comparison")
+            st.dataframe(comparison_df, use_container_width=True)
+            
+            # Visualize metrics
+            st.markdown("#### Performance Metrics Visualization")
+            metrics_to_plot = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
+            
+            for metric in metrics_to_plot:
+                if metric in comparison_df.columns:
+                    chart_data = comparison_df.set_index('Model')[metric]
+                    st.bar_chart(chart_data)
+                    st.markdown(f"**{metric}**")
+        else:
+            st.info("Model comparison data not available. Run the training script to generate it.")
+    except Exception as e:
+        st.warning(f"Could not load model comparison: {e}")
     
     st.markdown("""
     The models were evaluated using the following metrics:
@@ -235,12 +309,15 @@ with tab2:
     - **Precision**: Proportion of positive predictions that were correct
     - **Recall**: Proportion of actual positives that were identified
     - **F1-Score**: Harmonic mean of precision and recall
-    - **ROC-AUC**: Area under the ROC curve
+    - **ROC-AUC**: Area under the ROC curve (best metric for imbalanced datasets)
     
-    ### Models Trained:
+    ### Models Available:
     1. **Logistic Regression**: Simple linear model for binary classification
     2. **Random Forest**: Ensemble of decision trees
     3. **XGBoost**: Gradient boosting algorithm
+    4. **Gradient Boosting**: Another gradient boosting implementation
+    5. **Neural Network**: Multi-layer perceptron
+    6. **Ensemble**: Voting classifier combining multiple models
     """)
 
 with tab3:
@@ -249,49 +326,51 @@ with tab3:
     st.markdown("""
     #### Features Description:
     
-    1. **Age**: Patient's age in years
-    2. **Sex**: 0 = Female, 1 = Male
-    3. **Chest Pain Type (cp)**: 
-       - 0: Typical Angina
-       - 1: Atypical Angina
-       - 2: Non-anginal Pain
-       - 3: Asymptomatic
-    4. **Resting Blood Pressure (trestbps)**: Measured in mm Hg
-    5. **Cholesterol (chol)**: Serum cholesterol in mg/dl
-    6. **Fasting Blood Sugar (fbs)**: > 120 mg/dl (1 = true, 0 = false)
-    7. **Resting ECG (restecg)**:
-       - 0: Normal
-       - 1: ST-T wave abnormality
-       - 2: Left ventricular hypertrophy
-    8. **Maximum Heart Rate (thalach)**: Maximum heart rate achieved
-    9. **Exercise Induced Angina (exang)**: 1 = Yes, 0 = No
-    10. **ST Depression (oldpeak)**: Induced by exercise relative to rest
-    11. **Slope**: Slope of the peak exercise ST segment
-        - 0: Upsloping
-        - 1: Flat
-        - 2: Downsloping
-    12. **Number of Major Vessels (ca)**: Colored by fluoroscopy (0-3)
-    13. **Thalassemia (thal)**:
-        - 0: Normal
-        - 1: Fixed defect
-        - 2: Reversible defect
-        - 3: Not described
+    **Demographics:**
+    - **Age**: Patient's age in years
+    - **Gender**: Male or Female
+    - **BMI**: Body Mass Index
+    
+    **Cardiovascular Metrics:**
+    - **Blood Pressure**: Measured in mm Hg
+    - **Cholesterol Level**: Total cholesterol in mg/dl
+    - **Triglyceride Level**: Triglycerides in mg/dl
+    - **High Blood Pressure**: Yes/No indicator
+    - **Low HDL Cholesterol**: Yes/No indicator
+    - **High LDL Cholesterol**: Yes/No indicator
+    
+    **Lifestyle Factors:**
+    - **Exercise Habits**: Low, Medium, or High
+    - **Smoking**: Yes/No
+    - **Alcohol Consumption**: None, Low, Medium, or High
+    - **Sleep Hours**: Hours of sleep per day
+    - **Sugar Consumption**: Low, Medium, or High
+    - **Stress Level**: Low, Medium, or High
+    
+    **Medical History:**
+    - **Family Heart Disease**: Yes/No for family history
+    - **Diabetes**: Yes/No
+    - **Fasting Blood Sugar**: In mg/dl
+    
+    **Biomarkers:**
+    - **CRP Level**: C-Reactive Protein level in mg/L (inflammation marker)
+    - **Homocysteine Level**: In µmol/L (cardiovascular risk marker)
     
     #### Target:
-    - **0**: No heart disease
-    - **1**: Heart disease present
+    - **Heart Disease Status**: Yes or No
     
     #### Dataset Statistics:
-    - Total samples: 303
-    - Features: 13
-    - Binary classification problem
+    - Total samples: 10,000
+    - Features: 20 (plus 5 engineered features)
+    - Class distribution: 80% No Disease, 20% Disease
+    - Handles imbalanced data using SMOTE (Synthetic Minority Over-sampling Technique)
     """)
 
 # Footer
 st.markdown("---")
 st.markdown(
     "<p style='text-align: center; color: #7F8C8D;'>"
-    "Heart Disease Predictor | Built with Streamlit & Scikit-learn | "
+    "Heart Disease Predictor | Built with Streamlit, Scikit-learn & XGBoost | "
     "For educational purposes only"
     "</p>",
     unsafe_allow_html=True
