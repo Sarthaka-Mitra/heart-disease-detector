@@ -66,6 +66,8 @@ def load_models():
             models['Gradient Boosting'] = joblib.load(model_path / 'gradient_boosting_model.pkl')
         if (model_path / 'neural_network_model.pkl').exists():
             models['Neural Network'] = joblib.load(model_path / 'neural_network_model.pkl')
+        if (model_path / 'hrlfm_model.pkl').exists():
+            models['HRLFM'] = joblib.load(model_path / 'hrlfm_model.pkl')
         if (model_path / 'ensemble_model.pkl').exists():
             models['Ensemble'] = joblib.load(model_path / 'ensemble_model.pkl')
         if (model_path / 'best_model.pkl').exists():
@@ -317,7 +319,8 @@ with tab2:
     3. **XGBoost**: Gradient boosting algorithm
     4. **Gradient Boosting**: Another gradient boosting implementation
     5. **Neural Network**: Multi-layer perceptron
-    6. **Ensemble**: Voting classifier combining multiple models
+    6. **HRLFM**: Hybrid Random Linear Forest Model - combines Random Forest with Logistic Regression
+    7. **Ensemble**: Voting classifier combining multiple models
     """)
 
 with tab3:
