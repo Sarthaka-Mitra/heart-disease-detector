@@ -32,8 +32,8 @@ wheels/
 htmlcov/
 *.cover
 
-# Models
-*.pkl
+# Models - exclude large ensemble models that exceed GitHub's 100MB limit
+ensemble_model.pkl
 *.joblib
 *.h5
 
