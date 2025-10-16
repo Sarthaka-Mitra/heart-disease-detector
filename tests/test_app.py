@@ -54,6 +54,7 @@ class TestModels(unittest.TestCase):
             'random_forest_model.pkl',
             'xgboost_model.pkl',
             'gradient_boosting_model.pkl',
+            'hrlfm_model.pkl',
             'best_model.pkl'
         ]
         

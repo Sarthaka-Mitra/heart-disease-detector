@@ -263,7 +263,27 @@ def main():
     )
     joblib.dump(results['Neural Network']['model'], 'models/neural_network_model.pkl')
     
-    # 6. Ensemble (Voting Classifier)
+    # 6. HRLFM (Hybrid Random Linear Forest Model)
+    print("\n" + "="*60)
+    print("Creating HRLFM (Hybrid Random Linear Forest Model)...")
+    print("="*60)
+    # HRLFM combines Random Forest with Logistic Regression for hybrid predictions
+    hrlfm_model = VotingClassifier(
+        estimators=[
+            ('rf', RandomForestClassifier(
+                n_estimators=300, max_depth=25, min_samples_split=5, 
+                min_samples_leaf=2, random_state=42, n_jobs=-1
+            )),
+            ('lr', LogisticRegression(random_state=42, max_iter=2000, C=0.5))
+        ],
+        voting='soft'
+    )
+    results['HRLFM'] = train_and_evaluate_model(
+        hrlfm_model, 'HRLFM', X_train_balanced, X_test, y_train_balanced, y_test
+    )
+    joblib.dump(results['HRLFM']['model'], 'models/hrlfm_model.pkl')
+    
+    # 7. Ensemble (Voting Classifier)
     print("\n" + "="*60)
     print("Creating Ensemble Model (Voting Classifier)...")
     print("="*60)
