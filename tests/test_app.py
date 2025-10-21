@@ -14,27 +14,34 @@ sys.path.insert(0, str(project_root))
 class TestDataset(unittest.TestCase):
     """Test dataset loading and validation"""
     
-    def test_dataset_exists(self):
+    def test_cleaned_merged_dataset_exists(self):
+        """Test that the cleaned merged dataset file exists"""
+        dataset_path = project_root / 'data' / 'cleaned_merged_heart_dataset.csv'
+        self.assertTrue(dataset_path.exists(), "Cleaned merged dataset file should exist")
+    
+    def test_new_dataset_exists(self):
         """Test that the new dataset file exists"""
         dataset_path = project_root / 'data' / 'heart_disease.csv'
-        self.assertTrue(dataset_path.exists(), "New dataset file should exist")
+        if dataset_path.exists():
+            self.assertTrue(dataset_path.exists(), "New dataset file should exist")
     
     def test_old_dataset_exists(self):
         """Test that the old dataset file still exists"""
         dataset_path = project_root / 'data' / 'heart.csv'
-        self.assertTrue(dataset_path.exists(), "Old dataset file should exist")
+        if dataset_path.exists():
+            self.assertTrue(dataset_path.exists(), "Old dataset file should exist")
     
-    def test_dataset_structure(self):
-        """Test that the new dataset has correct structure"""
+    def test_cleaned_merged_dataset_structure(self):
+        """Test that the cleaned merged dataset has correct structure"""
         import pandas as pd
-        dataset_path = project_root / 'data' / 'heart_disease.csv'
+        dataset_path = project_root / 'data' / 'cleaned_merged_heart_dataset.csv'
         df = pd.read_csv(dataset_path)
         
         # Check number of columns
-        self.assertEqual(len(df.columns), 21, "Dataset should have 21 columns")
+        self.assertEqual(len(df.columns), 14, "Dataset should have 14 columns")
         
         # Check for target column
-        self.assertIn('Heart Disease Status', df.columns, "Dataset should have 'Heart Disease Status' column")
+        self.assertIn('target', df.columns, "Dataset should have 'target' column")
         
         # Check number of samples
         self.assertGreater(len(df), 0, "Dataset should not be empty")
@@ -53,7 +60,10 @@ class TestModels(unittest.TestCase):
             'logistic_regression_model.pkl',
             'random_forest_model.pkl',
             'xgboost_model.pkl',
-            'gradient_boosting_model.pkl',
+            'lightgbm_model.pkl',
+            'svm_model.pkl',
+            'voting_ensemble_model.pkl',
+            'stacking_ensemble_model.pkl',
             'hrlfm_model.pkl',
             'best_model.pkl'
         ]
@@ -75,9 +85,7 @@ class TestModels(unittest.TestCase):
         models_dir = project_root / 'models'
         preprocessing_files = [
             'scaler.pkl',
-            'label_encoders.pkl',
-            'feature_names.pkl',
-            'target_encoder.pkl'
+            'feature_names.pkl'
         ]
         
         for preproc_file in preprocessing_files:

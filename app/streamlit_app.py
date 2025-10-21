@@ -4,6 +4,8 @@ import numpy as np
 import joblib
 import os
 from pathlib import Path
+import warnings
+warnings.filterwarnings('ignore')
 
 # Set page config
 st.set_page_config(
@@ -62,58 +64,58 @@ def load_models():
             models['Random Forest'] = joblib.load(model_path / 'random_forest_model.pkl')
         if (model_path / 'xgboost_model.pkl').exists():
             models['XGBoost'] = joblib.load(model_path / 'xgboost_model.pkl')
-        if (model_path / 'gradient_boosting_model.pkl').exists():
-            models['Gradient Boosting'] = joblib.load(model_path / 'gradient_boosting_model.pkl')
-        if (model_path / 'neural_network_model.pkl').exists():
-            models['Neural Network'] = joblib.load(model_path / 'neural_network_model.pkl')
+        if (model_path / 'lightgbm_model.pkl').exists():
+            models['LightGBM'] = joblib.load(model_path / 'lightgbm_model.pkl')
+        if (model_path / 'svm_model.pkl').exists():
+            models['SVM'] = joblib.load(model_path / 'svm_model.pkl')
+        if (model_path / 'voting_ensemble_model.pkl').exists():
+            models['Voting Ensemble'] = joblib.load(model_path / 'voting_ensemble_model.pkl')
+        if (model_path / 'stacking_ensemble_model.pkl').exists():
+            models['Stacking Ensemble'] = joblib.load(model_path / 'stacking_ensemble_model.pkl')
         if (model_path / 'hrlfm_model.pkl').exists():
-            models['HRLFM'] = joblib.load(model_path / 'hrlfm_model.pkl')
-        if (model_path / 'ensemble_model.pkl').exists():
-            models['Ensemble'] = joblib.load(model_path / 'ensemble_model.pkl')
+            models['HRLFM (Best)'] = joblib.load(model_path / 'hrlfm_model.pkl')
         if (model_path / 'best_model.pkl').exists():
             models['Best Model'] = joblib.load(model_path / 'best_model.pkl')
     except Exception as e:
         st.error(f"Error loading models: {e}")
-        return None, None, None, None
+        return None, None, None
     
     # Load preprocessing objects
     scaler = None
-    label_encoders = None
     feature_names = None
     
     try:
         if (model_path / 'scaler.pkl').exists():
             scaler = joblib.load(model_path / 'scaler.pkl')
-        if (model_path / 'label_encoders.pkl').exists():
-            label_encoders = joblib.load(model_path / 'label_encoders.pkl')
         if (model_path / 'feature_names.pkl').exists():
             feature_names = joblib.load(model_path / 'feature_names.pkl')
     except Exception as e:
         st.warning(f"Preprocessing objects not fully loaded: {e}")
     
-    return models, scaler, label_encoders, feature_names
+    return models, scaler, feature_names
 
 # Sidebar - Model Selection
 st.sidebar.title("⚙️ Configuration")
-models, scaler, label_encoders, feature_names = load_models()
+models, scaler, feature_names = load_models()
 
 if models:
     selected_model_name = st.sidebar.selectbox(
         "Select Model",
         list(models.keys()),
-        index=len(models) - 1 if 'Best Model' in models else 0
+        index=0
     )
     model = models[selected_model_name]
 else:
-    st.error("No models found. Please run the training script first: `python train_new_models.py`")
+    st.error("No models found. Please run the training script first: `python train_hrlfm_pipeline.py`")
     st.stop()
 
 # Sidebar - Information
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 About")
 st.sidebar.info(
-    "This application predicts the likelihood of heart disease based on various health parameters. "
-    "The models were trained on a comprehensive heart disease dataset with 10,000 patient records."
+    "This application predicts the likelihood of heart disease based on various clinical parameters. "
+    "The models were trained on the cleaned merged heart disease dataset with 1,888 patient records using "
+    "advanced ML techniques including HRLFM (High-Resolution Logistic-Forest Model)."
 )
 
 st.sidebar.markdown("### 🎯 Model Info")
@@ -124,117 +126,186 @@ tab1, tab2, tab3 = st.tabs(["🔍 Prediction", "📈 Model Performance", "ℹ️
 
 with tab1:
     st.markdown("### Enter Patient Information")
+    st.markdown("*Please enter clinical measurements from patient examination*")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        age = st.number_input("Age (years)", min_value=18, max_value=100, value=50, step=1)
-        gender = st.selectbox("Gender", options=["Male", "Female"])
-        blood_pressure = st.number_input("Blood Pressure (mm Hg)", min_value=80, max_value=200, value=120, step=1)
-        cholesterol = st.number_input("Cholesterol Level (mg/dl)", min_value=100, max_value=400, value=200, step=1)
-        exercise = st.selectbox("Exercise Habits", options=["Low", "Medium", "High"])
-        smoking = st.selectbox("Smoking", options=["No", "Yes"])
-        family_history = st.selectbox("Family Heart Disease", options=["No", "Yes"])
+        st.markdown("**Demographics**")
+        age = st.number_input("Age (years)", min_value=18, max_value=100, value=50, step=1, 
+                             help="Patient's age in years")
+        sex = st.selectbox("Sex", options=[1, 0], format_func=lambda x: "Male" if x == 1 else "Female",
+                          help="Biological sex: 1 = Male, 0 = Female")
+        
+        st.markdown("**Chest Pain Type**")
+        cp = st.selectbox("Chest Pain Type (cp)", 
+                         options=[0, 1, 2, 3, 4],
+                         format_func=lambda x: {
+                             0: "0 - Typical Angina",
+                             1: "1 - Atypical Angina", 
+                             2: "2 - Non-anginal Pain",
+                             3: "3 - Asymptomatic",
+                             4: "4 - Other"
+                         }.get(x, str(x)),
+                         help="Type of chest pain experienced")
+        
+        st.markdown("**Cardiovascular Metrics**")
+        trestbps = st.number_input("Resting Blood Pressure (mm Hg)", 
+                                   min_value=80, max_value=200, value=120, step=1,
+                                   help="Resting blood pressure in mm Hg")
+        chol = st.number_input("Serum Cholesterol (mg/dl)", 
+                              min_value=100, max_value=600, value=200, step=1,
+                              help="Serum cholesterol in mg/dl")
     
     with col2:
-        diabetes = st.selectbox("Diabetes", options=["No", "Yes"])
-        bmi = st.number_input("BMI", min_value=15.0, max_value=50.0, value=25.0, step=0.1)
-        high_bp = st.selectbox("High Blood Pressure", options=["No", "Yes"])
-        low_hdl = st.selectbox("Low HDL Cholesterol", options=["No", "Yes"])
-        high_ldl = st.selectbox("High LDL Cholesterol", options=["No", "Yes"])
-        alcohol = st.selectbox("Alcohol Consumption", options=["None", "Low", "Medium", "High"])
-        stress = st.selectbox("Stress Level", options=["Low", "Medium", "High"])
+        st.markdown("**Blood Sugar & ECG**")
+        fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl", 
+                          options=[0, 1],
+                          format_func=lambda x: "Yes" if x == 1 else "No",
+                          help="1 if fasting blood sugar > 120 mg/dl, 0 otherwise")
+        restecg = st.selectbox("Resting ECG Results", 
+                              options=[0, 1, 2],
+                              format_func=lambda x: {
+                                  0: "0 - Normal",
+                                  1: "1 - ST-T Wave Abnormality",
+                                  2: "2 - Left Ventricular Hypertrophy"
+                              }.get(x, str(x)),
+                              help="Resting electrocardiographic results")
+        
+        st.markdown("**Exercise Metrics**")
+        thalachh = st.number_input("Maximum Heart Rate Achieved", 
+                                   min_value=60, max_value=220, value=150, step=1,
+                                   help="Maximum heart rate achieved during exercise")
+        exang = st.selectbox("Exercise Induced Angina", 
+                            options=[0, 1],
+                            format_func=lambda x: "Yes" if x == 1 else "No",
+                            help="Exercise induced angina: 1 = Yes, 0 = No")
+        oldpeak = st.number_input("ST Depression (oldpeak)", 
+                                 min_value=0.0, max_value=7.0, value=1.0, step=0.1,
+                                 help="ST depression induced by exercise relative to rest")
     
     with col3:
-        sleep_hours = st.number_input("Sleep Hours per day", min_value=3.0, max_value=12.0, value=7.0, step=0.5)
-        sugar_consumption = st.selectbox("Sugar Consumption", options=["Low", "Medium", "High"])
-        triglyceride = st.number_input("Triglyceride Level (mg/dl)", min_value=50, max_value=500, value=150, step=1)
-        fasting_bs = st.number_input("Fasting Blood Sugar (mg/dl)", min_value=70, max_value=200, value=100, step=1)
-        crp_level = st.number_input("CRP Level (mg/L)", min_value=0.0, max_value=20.0, value=5.0, step=0.1)
-        homocysteine = st.number_input("Homocysteine Level (µmol/L)", min_value=4.0, max_value=25.0, value=10.0, step=0.1)
+        st.markdown("**Additional Diagnostics**")
+        slope = st.selectbox("Slope of Peak Exercise ST Segment", 
+                            options=[0, 1, 2, 3],
+                            format_func=lambda x: {
+                                0: "0 - Upsloping",
+                                1: "1 - Flat",
+                                2: "2 - Downsloping",
+                                3: "3 - Unknown"
+                            }.get(x, str(x)),
+                            help="Slope of the peak exercise ST segment")
+        ca = st.selectbox("Number of Major Vessels (0-4)", 
+                         options=[0, 1, 2, 3, 4],
+                         help="Number of major vessels colored by fluoroscopy")
+        thal = st.selectbox("Thalassemia", 
+                           options=[0, 1, 2, 3, 7],
+                           format_func=lambda x: {
+                               0: "0 - Unknown",
+                               1: "1 - Normal",
+                               2: "2 - Fixed Defect",
+                               3: "3 - Reversible Defect",
+                               7: "7 - Other"
+                           }.get(x, str(x)),
+                           help="Thalassemia: blood disorder")
     
     st.markdown("---")
     
     # Prediction button
     if st.button("🔮 Predict Heart Disease Risk", type="primary", use_container_width=True):
-        # Prepare input data
-        input_dict = {
-            'Age': age,
-            'Gender': gender,
-            'Blood Pressure': blood_pressure,
-            'Cholesterol Level': cholesterol,
-            'Exercise Habits': exercise,
-            'Smoking': smoking,
-            'Family Heart Disease': family_history,
-            'Diabetes': diabetes,
-            'BMI': bmi,
-            'High Blood Pressure': high_bp,
-            'Low HDL Cholesterol': low_hdl,
-            'High LDL Cholesterol': high_ldl,
-            'Alcohol Consumption': alcohol,
-            'Stress Level': stress,
-            'Sleep Hours': sleep_hours,
-            'Sugar Consumption': sugar_consumption,
-            'Triglyceride Level': triglyceride,
-            'Fasting Blood Sugar': fasting_bs,
-            'CRP Level': crp_level,
-            'Homocysteine Level': homocysteine
+        # Prepare base features
+        base_features = {
+            'age': age,
+            'sex': sex,
+            'cp': cp,
+            'trestbps': trestbps,
+            'chol': chol,
+            'fbs': fbs,
+            'restecg': restecg,
+            'thalachh': thalachh,
+            'exang': exang,
+            'oldpeak': oldpeak,
+            'slope': slope,
+            'ca': ca,
+            'thal': thal
         }
         
-        # Add engineered features
-        input_dict['Age_BMI_interaction'] = age * bmi
-        input_dict['BP_Chol_ratio'] = blood_pressure / (cholesterol + 1)
-        input_dict['Trig_Chol_ratio'] = triglyceride / (cholesterol + 1)
+        # Create engineered features (same as in training pipeline)
+        engineered_features = {}
         
-        # Age group
-        if age <= 35:
-            age_group = 'Young'
-        elif age <= 50:
-            age_group = 'MiddleAge'
-        elif age <= 65:
-            age_group = 'Senior'
+        # Age-related interactions
+        engineered_features['age_chol_interaction'] = age * chol
+        engineered_features['age_bp_interaction'] = age * trestbps
+        
+        # Blood pressure and cholesterol ratio
+        engineered_features['bp_chol_ratio'] = trestbps / (chol + 1)
+        
+        # Exercise capacity (max heart rate - age)
+        engineered_features['heart_rate_reserve'] = thalachh - age
+        
+        # ST depression and slope interaction
+        engineered_features['st_depression_severity'] = oldpeak * (slope + 1)
+        
+        # Risk score combination
+        engineered_features['chest_pain_exercise_risk'] = cp * (exang + 1)
+        
+        # Age groups (encoded as in training)
+        if age <= 40:
+            age_group = 0  # young
+        elif age <= 55:
+            age_group = 1  # middle
+        elif age <= 70:
+            age_group = 2  # senior
         else:
-            age_group = 'Elderly'
-        input_dict['Age_group'] = age_group
+            age_group = 3  # elderly
+        engineered_features['age_group'] = age_group
         
-        # BMI category
-        if bmi < 18.5:
-            bmi_cat = 'Underweight'
-        elif bmi < 25:
-            bmi_cat = 'Normal'
-        elif bmi < 30:
-            bmi_cat = 'Overweight'
+        # Cholesterol categories (encoded as in training)
+        if chol <= 200:
+            chol_cat = 0  # normal
+        elif chol <= 240:
+            chol_cat = 1  # borderline
         else:
-            bmi_cat = 'Obese'
-        input_dict['BMI_category'] = bmi_cat
+            chol_cat = 2  # high
+        engineered_features['chol_category'] = chol_cat
         
-        # Create DataFrame
-        input_df = pd.DataFrame([input_dict])
+        # Polynomial features (degree 2)
+        poly_features = {}
+        key_features = {'age': age, 'trestbps': trestbps, 'chol': chol, 'thalachh': thalachh, 'oldpeak': oldpeak}
         
-        # Encode categorical features using label encoders
-        if label_encoders:
-            for col, le in label_encoders.items():
-                if col in input_df.columns:
-                    try:
-                        input_df[col] = le.transform(input_df[col].astype(str))
-                    except:
-                        # If value not seen during training, use most common class
-                        input_df[col] = 0
+        # Generate polynomial features
+        for name1, val1 in key_features.items():
+            # Squared terms
+            poly_features[f'poly_{name1}^2'] = val1 ** 2
+            # Interaction terms
+            for name2, val2 in key_features.items():
+                if name1 < name2:  # Avoid duplicates
+                    poly_features[f'poly_{name1} {name2}'] = val1 * val2
         
-        # Reorder columns to match training order
+        # Combine all features
+        all_features = {**base_features, **engineered_features, **poly_features}
+        
+        # Create DataFrame with all features
+        input_df = pd.DataFrame([all_features])
+        
+        # Reorder columns to match training feature order
         if feature_names:
+            # Make sure we have all required features
+            for feat in feature_names:
+                if feat not in input_df.columns:
+                    input_df[feat] = 0  # Default value for missing features
             input_df = input_df[feature_names]
         
-        # Make prediction
+        # Scale features
         try:
-            # Check if model needs scaling (Logistic Regression, Neural Network)
-            if selected_model_name in ['Logistic Regression', 'Neural Network'] and scaler is not None:
+            if scaler is not None:
                 input_scaled = scaler.transform(input_df)
-                prediction = model.predict(input_scaled)
-                probability = model.predict_proba(input_scaled)[0]
             else:
-                prediction = model.predict(input_df)
-                probability = model.predict_proba(input_df)[0]
+                input_scaled = input_df.values
+            
+            # Make prediction
+            prediction = model.predict(input_scaled)
+            probability = model.predict_proba(input_scaled)[0]
             
             # Display results
             st.markdown("### 🎯 Prediction Results")
@@ -271,6 +342,25 @@ with tab1:
                 })
                 st.bar_chart(prob_df.set_index('Category'))
             
+            # Show top contributing features
+            st.markdown("---")
+            st.markdown("#### 📊 Input Summary")
+            summary_data = {
+                'Parameter': ['Age', 'Sex', 'Chest Pain Type', 'Resting BP', 'Cholesterol', 
+                             'Max Heart Rate', 'Exercise Angina', 'ST Depression'],
+                'Value': [
+                    f"{age} years",
+                    "Male" if sex == 1 else "Female",
+                    cp,
+                    f"{trestbps} mm Hg",
+                    f"{chol} mg/dl",
+                    f"{thalachh} bpm",
+                    "Yes" if exang == 1 else "No",
+                    f"{oldpeak}"
+                ]
+            }
+            st.table(pd.DataFrame(summary_data))
+            
             # Disclaimer
             st.markdown("---")
             st.warning("⚠️ **Disclaimer**: This is a prediction tool and should not replace professional medical advice. "
@@ -279,6 +369,8 @@ with tab1:
         except Exception as e:
             st.error(f"Error making prediction: {e}")
             st.error("Please ensure all required fields are filled correctly.")
+            import traceback
+            st.error(traceback.format_exc())
 
 with tab2:
     st.markdown("### 📊 Model Performance Metrics")
@@ -293,34 +385,93 @@ with tab2:
             
             # Visualize metrics
             st.markdown("#### Performance Metrics Visualization")
-            metrics_to_plot = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
             
-            for metric in metrics_to_plot:
-                if metric in comparison_df.columns:
-                    chart_data = comparison_df.set_index('Model')[metric]
+            # Create bar charts for each metric
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if 'Accuracy' in comparison_df.columns:
+                    st.markdown("**Accuracy by Model**")
+                    chart_data = comparison_df.set_index('Model')[['Accuracy']]
                     st.bar_chart(chart_data)
-                    st.markdown(f"**{metric}**")
+                
+                if 'Precision' in comparison_df.columns:
+                    st.markdown("**Precision by Model**")
+                    chart_data = comparison_df.set_index('Model')[['Precision']]
+                    st.bar_chart(chart_data)
+                
+                if 'F1-Score' in comparison_df.columns:
+                    st.markdown("**F1-Score by Model**")
+                    chart_data = comparison_df.set_index('Model')[['F1-Score']]
+                    st.bar_chart(chart_data)
+            
+            with col2:
+                if 'Recall' in comparison_df.columns:
+                    st.markdown("**Recall by Model**")
+                    chart_data = comparison_df.set_index('Model')[['Recall']]
+                    st.bar_chart(chart_data)
+                
+                if 'ROC-AUC' in comparison_df.columns:
+                    st.markdown("**ROC-AUC by Model**")
+                    chart_data = comparison_df.set_index('Model')[['ROC-AUC']]
+                    st.bar_chart(chart_data)
+            
+            # Show visualizations if available
+            st.markdown("---")
+            st.markdown("#### Additional Visualizations")
+            
+            viz_col1, viz_col2, viz_col3 = st.columns(3)
+            
+            with viz_col1:
+                if (model_path / 'confusion_matrix.png').exists():
+                    st.markdown("**Confusion Matrix**")
+                    st.image(str(model_path / 'confusion_matrix.png'), use_column_width=True)
+            
+            with viz_col2:
+                if (model_path / 'roc_curve.png').exists():
+                    st.markdown("**ROC Curve**")
+                    st.image(str(model_path / 'roc_curve.png'), use_column_width=True)
+            
+            with viz_col3:
+                if (model_path / 'feature_importance.png').exists():
+                    st.markdown("**Feature Importance**")
+                    st.image(str(model_path / 'feature_importance.png'), use_column_width=True)
         else:
             st.info("Model comparison data not available. Run the training script to generate it.")
     except Exception as e:
         st.warning(f"Could not load model comparison: {e}")
     
     st.markdown("""
-    The models were evaluated using the following metrics:
-    - **Accuracy**: Overall correctness of predictions
-    - **Precision**: Proportion of positive predictions that were correct
-    - **Recall**: Proportion of actual positives that were identified
-    - **F1-Score**: Harmonic mean of precision and recall
-    - **ROC-AUC**: Area under the ROC curve (best metric for imbalanced datasets)
+    ---
+    ### Evaluation Metrics Explained:
     
-    ### Models Available:
-    1. **Logistic Regression**: Simple linear model for binary classification
-    2. **Random Forest**: Ensemble of decision trees
-    3. **XGBoost**: Gradient boosting algorithm
-    4. **Gradient Boosting**: Another gradient boosting implementation
-    5. **Neural Network**: Multi-layer perceptron
-    6. **HRLFM**: Hybrid Random Linear Forest Model - combines Random Forest with Logistic Regression
-    7. **Ensemble**: Voting classifier combining multiple models
+    - **Accuracy**: Overall correctness of predictions (correct predictions / total predictions)
+    - **Precision**: Proportion of positive predictions that were correct (true positives / predicted positives)
+    - **Recall**: Proportion of actual positives that were identified (true positives / actual positives)
+    - **F1-Score**: Harmonic mean of precision and recall (balanced metric)
+    - **ROC-AUC**: Area under the ROC curve - measures model's ability to distinguish between classes
+    
+    ### Models Overview:
+    
+    1. **Logistic Regression**: Fast, interpretable linear model suitable for understanding feature relationships
+    2. **Random Forest**: Robust ensemble method with excellent performance on this dataset (97.9% accuracy)
+    3. **XGBoost**: Advanced gradient boosting with strong predictive power (96.8% accuracy)
+    4. **LightGBM**: Efficient gradient boosting variant (97.6% accuracy)
+    5. **SVM**: Support Vector Machine with non-linear kernel (91.8% accuracy)
+    6. **Voting Ensemble**: Combines predictions from multiple models using soft voting (97.6% accuracy)
+    7. **Stacking Ensemble**: Uses meta-model to combine base model predictions (95.5% accuracy)
+    8. **HRLFM**: High-Resolution Logistic-Forest Model - Hybrid approach combining linear and 
+       non-linear models with optimized meta-learning (96.3% accuracy)
+    
+    ### Training Details:
+    
+    - **Dataset**: 1,888 patient records from cleaned merged heart disease dataset
+    - **Features**: 13 original + 23 engineered = 36 selected features
+    - **Cross-Validation**: 5-fold stratified cross-validation
+    - **Hyperparameter Tuning**: RandomizedSearchCV and GridSearchCV
+    - **Class Balancing**: SMOTE (Synthetic Minority Over-sampling Technique)
+    - **Feature Scaling**: RobustScaler (less sensitive to outliers)
+    - **Target Achievement**: ✅ Exceeded 85% accuracy target (best model: 97.9%)
     """)
 
 with tab3:
@@ -329,45 +480,87 @@ with tab3:
     st.markdown("""
     #### Features Description:
     
-    **Demographics:**
-    - **Age**: Patient's age in years
-    - **Gender**: Male or Female
-    - **BMI**: Body Mass Index
+    This model was trained on the **cleaned merged heart disease dataset** containing 1,888 patient records 
+    with 14 clinical features.
     
-    **Cardiovascular Metrics:**
-    - **Blood Pressure**: Measured in mm Hg
-    - **Cholesterol Level**: Total cholesterol in mg/dl
-    - **Triglyceride Level**: Triglycerides in mg/dl
-    - **High Blood Pressure**: Yes/No indicator
-    - **Low HDL Cholesterol**: Yes/No indicator
-    - **High LDL Cholesterol**: Yes/No indicator
+    **Clinical Features:**
     
-    **Lifestyle Factors:**
-    - **Exercise Habits**: Low, Medium, or High
-    - **Smoking**: Yes/No
-    - **Alcohol Consumption**: None, Low, Medium, or High
-    - **Sleep Hours**: Hours of sleep per day
-    - **Sugar Consumption**: Low, Medium, or High
-    - **Stress Level**: Low, Medium, or High
+    1. **age**: Age in years
+    2. **sex**: Sex (1 = male, 0 = female)
+    3. **cp**: Chest pain type
+       - 0: Typical angina
+       - 1: Atypical angina
+       - 2: Non-anginal pain
+       - 3: Asymptomatic
+    4. **trestbps**: Resting blood pressure (mm Hg)
+    5. **chol**: Serum cholesterol (mg/dl)
+    6. **fbs**: Fasting blood sugar > 120 mg/dl (1 = true, 0 = false)
+    7. **restecg**: Resting electrocardiographic results
+       - 0: Normal
+       - 1: ST-T wave abnormality
+       - 2: Left ventricular hypertrophy
+    8. **thalachh**: Maximum heart rate achieved
+    9. **exang**: Exercise induced angina (1 = yes, 0 = no)
+    10. **oldpeak**: ST depression induced by exercise relative to rest
+    11. **slope**: Slope of the peak exercise ST segment
+        - 0: Upsloping
+        - 1: Flat
+        - 2: Downsloping
+    12. **ca**: Number of major vessels (0-4) colored by fluoroscopy
+    13. **thal**: Thalassemia
+        - 0: Unknown
+        - 1: Normal
+        - 2: Fixed defect
+        - 3: Reversible defect
     
-    **Medical History:**
-    - **Family Heart Disease**: Yes/No for family history
-    - **Diabetes**: Yes/No
-    - **Fasting Blood Sugar**: In mg/dl
+    **Engineered Features:**
+    The model uses 36 carefully engineered features including:
+    - Age-related interactions (age × cholesterol, age × blood pressure)
+    - Cardiovascular ratios (BP/cholesterol, heart rate reserve)
+    - ST depression severity indicators
+    - Chest pain-exercise risk scores
+    - Age and cholesterol categories
+    - Polynomial features (squared terms and interactions)
     
-    **Biomarkers:**
-    - **CRP Level**: C-Reactive Protein level in mg/L (inflammation marker)
-    - **Homocysteine Level**: In µmol/L (cardiovascular risk marker)
-    
-    #### Target:
-    - **Heart Disease Status**: Yes or No
+    #### Target Variable:
+    - **target**: Heart disease diagnosis (0 = No disease, 1 = Disease)
     
     #### Dataset Statistics:
-    - Total samples: 10,000
-    - Features: 20 (plus 5 engineered features)
-    - Class distribution: 80% No Disease, 20% Disease
-    - Handles imbalanced data using SMOTE (Synthetic Minority Over-sampling Technique)
+    - Total samples: 1,888
+    - Original features: 13
+    - Engineered features: 36 (after feature engineering and selection)
+    - Class distribution: Approximately 48% No Disease, 52% Disease
+    - Data preprocessing: Outlier handling, SMOTE balancing, robust scaling
+    
+    #### Models Available:
+    
+    1. **Logistic Regression**: Linear model for interpretable predictions
+    2. **Random Forest**: Ensemble of decision trees (97.9% accuracy)
+    3. **XGBoost**: Gradient boosting algorithm (96.8% accuracy)
+    4. **LightGBM**: Light gradient boosting (97.6% accuracy)
+    5. **SVM**: Support Vector Machine with RBF kernel (91.8% accuracy)
+    6. **Voting Ensemble**: Soft voting of top models (97.6% accuracy)
+    7. **Stacking Ensemble**: Meta-model stacking approach (95.5% accuracy)
+    8. **HRLFM (Best)**: High-Resolution Logistic-Forest Model - Hybrid approach combining 
+       Logistic Regression, Random Forest, and XGBoost with meta-model optimization (96.3% accuracy)
+    
+    #### Model Performance:
+    - All models achieved >75% accuracy
+    - Top models achieved >96% accuracy
+    - HRLFM provides balanced performance with high interpretability
+    - ROC-AUC scores >0.99 for top models
     """)
+    
+    # Display model comparison if available
+    st.markdown("---")
+    st.markdown("#### 📊 Model Performance Comparison")
+    try:
+        model_path = Path(__file__).parent.parent / 'models'
+        if (model_path / 'model_comparison.csv').exists():
+            comparison_df = pd.read_csv(model_path / 'model_comparison.csv')
+            st.dataframe(comparison_df, use_container_width=True)
+    except Exception as e:
+        st.info("Model comparison data not available.")
 
 # Footer
 st.markdown("---")
