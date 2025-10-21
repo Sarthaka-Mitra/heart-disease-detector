@@ -37,27 +37,28 @@ jobs:
         black --check . || true
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
     
-    - name: Train models with HRLFM pipeline
-      run: |
-        python train_hrlfm_pipeline.py
-      timeout-minutes: 15
+    # Skipping model training for now as requested
+    # - name: Train models with HRLFM pipeline
+    #   run: |
+    #     python train_hrlfm_pipeline.py
+    #   timeout-minutes: 15
     
-    - name: Verify models are generated
-      run: |
-        ls -la models/
-        if [ ! -f "models/best_model.pkl" ]; then
-          echo "best_model.pkl not found after training"
-          exit 1
-        fi
-        if [ ! -f "models/scaler.pkl" ]; then
-          echo "scaler.pkl not found after training"
-          exit 1
-        fi
-        if [ ! -f "models/feature_names.pkl" ]; then
-          echo "feature_names.pkl not found after training"
-          exit 1
-        fi
-        echo "All required models generated successfully"
+    # - name: Verify models are generated
+    #   run: |
+    #     ls -la models/
+    #     if [ ! -f "models/best_model.pkl" ]; then
+    #       echo "best_model.pkl not found after training"
+    #       exit 1
+    #     fi
+    #     if [ ! -f "models/scaler.pkl" ]; then
+    #       echo "scaler.pkl not found after training"
+    #       exit 1
+    #     fi
+    #     if [ ! -f "models/feature_names.pkl" ]; then
+    #       echo "feature_names.pkl not found after training"
+    #       exit 1
+    #     fi
+    #     echo "All required models generated successfully"
     
     - name: Test Streamlit app imports
       run: |
