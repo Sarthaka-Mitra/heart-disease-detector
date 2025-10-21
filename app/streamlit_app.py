@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import os
 from pathlib import Path
+from sklearn.preprocessing import PolynomialFeatures
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -269,18 +270,20 @@ with tab1:
             chol_cat = 2  # high
         engineered_features['chol_category'] = chol_cat
         
-        # Polynomial features (degree 2)
+        # Polynomial features (degree 2) - using PolynomialFeatures to match training
         poly_features = {}
-        key_features = {'age': age, 'trestbps': trestbps, 'chol': chol, 'thalachh': thalachh, 'oldpeak': oldpeak}
+        key_features_dict = {'age': age, 'trestbps': trestbps, 'chol': chol, 'thalachh': thalachh, 'oldpeak': oldpeak}
         
-        # Generate polynomial features
-        for name1, val1 in key_features.items():
-            # Squared terms
-            poly_features[f'poly_{name1}^2'] = val1 ** 2
-            # Interaction terms
-            for name2, val2 in key_features.items():
-                if name1 < name2:  # Avoid duplicates
-                    poly_features[f'poly_{name1} {name2}'] = val1 * val2
+        # Create a small dataframe for polynomial feature generation
+        key_features_df = pd.DataFrame([key_features_dict])
+        poly = PolynomialFeatures(degree=2, include_bias=False, interaction_only=False)
+        poly_data = poly.fit_transform(key_features_df)
+        poly_feature_names = poly.get_feature_names_out(key_features_df.columns)
+        
+        # Add polynomial features (excluding original features)
+        for i, name in enumerate(poly_feature_names):
+            if name not in key_features_df.columns:
+                poly_features[f'poly_{name}'] = poly_data[0, i]
         
         # Combine all features
         all_features = {**base_features, **engineered_features, **poly_features}
