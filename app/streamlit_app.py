@@ -291,19 +291,43 @@ with tab1:
         # Create DataFrame with all features
         input_df = pd.DataFrame([all_features])
         
-        # Reorder columns to match training feature order
-        if feature_names:
-            # Make sure we have all required features
-            for feat in feature_names:
-                if feat not in input_df.columns:
-                    input_df[feat] = 0  # Default value for missing features
-            input_df = input_df[feature_names]
-        
         # Scale features
         try:
             if scaler is not None:
-                input_scaled = scaler.transform(input_df)
+                # The scaler was fit on all features, so we need to ensure we have them in the right order
+                # Get the feature names the scaler expects (from when it was fit)
+                if hasattr(scaler, 'feature_names_in_'):
+                    scaler_features = list(scaler.feature_names_in_)
+                    # Make sure we have all required features
+                    for feat in scaler_features:
+                        if feat not in input_df.columns:
+                            input_df[feat] = 0  # Default value for missing features
+                    # Reorder columns to match scaler's expected order and transform
+                    input_df_for_scaling = input_df[scaler_features]
+                    input_scaled_all = scaler.transform(input_df_for_scaling)
+                    
+                    # Now select only the features that the model was trained on
+                    if feature_names:
+                        selected_indices = [scaler_features.index(f) for f in feature_names if f in scaler_features]
+                        input_scaled = input_scaled_all[:, selected_indices]
+                    else:
+                        input_scaled = input_scaled_all
+                else:
+                    # Fallback: scaler doesn't have feature_names_in_ (shouldn't happen with sklearn >= 1.0)
+                    # Assume feature_names has the right features
+                    if feature_names:
+                        for feat in feature_names:
+                            if feat not in input_df.columns:
+                                input_df[feat] = 0
+                        input_df = input_df[feature_names]
+                    input_scaled = scaler.transform(input_df)
             else:
+                # If no scaler, just use the selected features
+                if feature_names:
+                    for feat in feature_names:
+                        if feat not in input_df.columns:
+                            input_df[feat] = 0
+                    input_df = input_df[feature_names]
                 input_scaled = input_df.values
             
             # Make prediction
