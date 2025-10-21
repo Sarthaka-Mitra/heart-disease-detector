@@ -14,38 +14,42 @@ sys.path.insert(0, str(project_root))
 class TestDataset(unittest.TestCase):
     """Test dataset loading and validation"""
     
-    def test_cleaned_merged_dataset_exists(self):
-        """Test that the cleaned merged dataset file exists"""
+    def test_hrlfm_dataset_exists(self):
+        """Test that the HRLFM dataset file exists"""
         dataset_path = project_root / 'data' / 'cleaned_merged_heart_dataset.csv'
-        self.assertTrue(dataset_path.exists(), "Cleaned merged dataset file should exist")
+        self.assertTrue(dataset_path.exists(), "HRLFM dataset file should exist")
     
-    def test_new_dataset_exists(self):
-        """Test that the new dataset file exists"""
-        dataset_path = project_root / 'data' / 'heart_disease.csv'
-        if dataset_path.exists():
-            self.assertTrue(dataset_path.exists(), "New dataset file should exist")
-    
-    def test_old_dataset_exists(self):
-        """Test that the old dataset file still exists"""
-        dataset_path = project_root / 'data' / 'heart.csv'
-        if dataset_path.exists():
-            self.assertTrue(dataset_path.exists(), "Old dataset file should exist")
-    
-    def test_cleaned_merged_dataset_structure(self):
-        """Test that the cleaned merged dataset has correct structure"""
+    def test_hrlfm_dataset_structure(self):
+        """Test that the HRLFM dataset has correct structure"""
         import pandas as pd
         dataset_path = project_root / 'data' / 'cleaned_merged_heart_dataset.csv'
         df = pd.read_csv(dataset_path)
         
-        # Check number of columns
+        # Check number of columns (13 features + 1 target = 14 columns)
         self.assertEqual(len(df.columns), 14, "Dataset should have 14 columns")
         
         # Check for target column
         self.assertIn('target', df.columns, "Dataset should have 'target' column")
         
-        # Check number of samples
+        # Check number of samples (should be 1,888)
         self.assertGreater(len(df), 0, "Dataset should not be empty")
         self.assertGreater(len(df), 1000, "Dataset should have at least 1000 samples")
+        self.assertEqual(len(df), 1888, "Dataset should have exactly 1,888 samples")
+    
+    def test_hrlfm_dataset_required_features(self):
+        """Test that the HRLFM dataset has all required features"""
+        import pandas as pd
+        dataset_path = project_root / 'data' / 'cleaned_merged_heart_dataset.csv'
+        df = pd.read_csv(dataset_path)
+        
+        required_features = [
+            'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 
+            'restecg', 'thalachh', 'exang', 'oldpeak', 
+            'slope', 'ca', 'thal', 'target'
+        ]
+        
+        for feature in required_features:
+            self.assertIn(feature, df.columns, f"Dataset should have '{feature}' column")
 
 
 class TestModels(unittest.TestCase):

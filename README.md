@@ -1,34 +1,33 @@
 # Heart Disease Detector 🫀
 
-A comprehensive machine learning project for predicting heart disease using multiple ML algorithms with a professional Streamlit web interface.
+A comprehensive machine learning project for predicting heart disease using the High-Resolution Logistic-Forest Model (HRLFM) pipeline with a professional Streamlit web interface.
 
 ## 📋 Overview
 
-This project implements a complete heart disease prediction system using various machine learning models. It includes:
-- **Multiple ML Models**: Logistic Regression, Random Forest, XGBoost, Gradient Boosting, Neural Network, and Ensemble
+This project implements the **HRLFM (High-Resolution Logistic-Forest Model)** pipeline - a complete heart disease prediction system achieving **97.9% accuracy**. It includes:
+- **8 ML Models**: Logistic Regression, Random Forest, XGBoost, LightGBM, SVM, Voting Ensemble, Stacking Ensemble, and HRLFM
+- **Advanced Feature Engineering**: 23 engineered features (polynomial, interaction, domain-specific)
+- **Model Interpretability**: SHAP and LIME explanations
 - **Web Application**: Interactive Streamlit app for real-time predictions
-- **Advanced Preprocessing**: SMOTE for handling class imbalance, feature engineering
-- **Model Comparison**: Performance metrics and visualizations
+- **Automated Setup**: Single bash script to setup and run the entire pipeline
 
 ## 🚀 Features
 
-- ✅ Clean, organized repository structure
+- ✅ **HRLFM Pipeline** - High-Resolution Logistic-Forest Model achieving 97.9% accuracy
+- ✅ Clean, focused repository structure (only HRLFM pipeline components)
 - ✅ Comprehensive dataset with 1,888 patient records (cleaned_merged_heart_dataset.csv)
-- ✅ **NEW: Complete HRLFM Pipeline** - High-Resolution Logistic-Forest Model achieving 97.9% accuracy
 - ✅ Advanced feature engineering (23 engineered features: polynomial, interaction, domain-specific)
-- ✅ Multiple ML models with performance comparison (8 models)
+- ✅ 8 ML models with performance comparison
 - ✅ Feature selection using tree-based importance and statistical methods
 - ✅ Hyperparameter tuning with RandomizedSearchCV and GridSearchCV
 - ✅ SMOTE for handling imbalanced data
 - ✅ Ensemble methods: Voting Classifier and Stacking
 - ✅ Model interpretability with SHAP and LIME
 - ✅ Professional Streamlit UI for deployment
+- ✅ Automated bash script for virtual environment setup and pipeline execution
 - ✅ Model persistence using joblib
 - ✅ Detailed documentation and dataset description
 - ✅ Unit tests for code validation
-- ✅ CI/CD pipeline with GitHub Actions
-- ✅ Docker support for containerized deployment
-- ✅ Helper scripts for automation
 
 ## 📁 Project Structure
 
@@ -36,25 +35,23 @@ This project implements a complete heart disease prediction system using various
 heart-disease-detector/
 │
 ├── data/                          # Dataset directory
-│   ├── heart.csv                  # Original heart disease dataset (303 records)
-│   ├── heart_disease.csv          # New comprehensive dataset (10,000 records)
+│   ├── cleaned_merged_heart_dataset.csv  # HRLFM dataset (1,888 records)
 │   └── README.md                  # Dataset description
 │
-├── notebooks/                     # Jupyter notebooks
-│   └── heart_disease_analysis.ipynb  # Original analysis notebook
-│
-├── models/                        # Trained models (generated after running training)
+├── models/                        # Trained models (generated after running pipeline)
 │   ├── logistic_regression_model.pkl
 │   ├── random_forest_model.pkl
 │   ├── xgboost_model.pkl
-│   ├── gradient_boosting_model.pkl
-│   ├── neural_network_model.pkl
-│   ├── ensemble_model.pkl
+│   ├── lightgbm_model.pkl
+│   ├── svm_model.pkl
+│   ├── voting_ensemble_model.pkl
+│   ├── stacking_ensemble_model.pkl
+│   ├── hrlfm_model.pkl
 │   ├── best_model.pkl
 │   ├── scaler.pkl
-│   ├── label_encoders.pkl
 │   ├── feature_names.pkl
-│   └── model_comparison.csv
+│   ├── model_comparison.csv
+│   └── *.png (visualizations)
 │
 ├── app/                          # Streamlit application
 │   └── streamlit_app.py          # Main application file
@@ -63,50 +60,49 @@ heart-disease-detector/
 │   ├── __init__.py
 │   └── test_app.py               # Application tests
 │
-├── .github/                      # GitHub Actions workflows
-│   └── workflows/
-│       └── ci.yml                # CI/CD pipeline
-│
 ├── .streamlit/                   # Streamlit configuration
 │   └── config.toml               # App configuration
 │
 ├── requirements.txt              # Python dependencies
 ├── requirements-dev.txt          # Development dependencies
 ├── setup.py                      # Package setup
-├── start_app.sh                  # 🆕 Complete setup & deployment script (recommended)
-├── train_new_models.py           # New training script for updated dataset
-├── train_final_optimized_models.py  # Optimized training script
+├── run_hrlfm_pipeline.sh         # 🆕 Automated setup & pipeline execution script
+├── train_hrlfm_pipeline.py       # HRLFM pipeline training script
 ├── Dockerfile                    # Docker image configuration
 ├── docker-compose.yml            # Docker Compose configuration
 ├── .gitignore                    # Git ignore file
 ├── .dockerignore                 # Docker ignore file
-├── run_app.sh                    # Application launcher script
-├── run_tests.sh                  # Test runner script
-├── train_models.sh               # Model training script
+├── HRLFM_PIPELINE.md             # Complete pipeline documentation
+├── CONTRIBUTING.md               # Contribution guidelines
+├── LICENSE                       # MIT License
 └── README.md                     # This file
 ```
 
-## 🛠️ Installation
+## 🛠️ Installation & Quick Start
 
-### Quick Start (Recommended)
+### Automated Setup (Recommended)
 
-Use the automated setup script that handles everything in one command:
+Use the automated HRLFM pipeline script that handles everything in one command:
 
 ```bash
 git clone https://github.com/Sarthaka-Mitra/heart-disease-detector.git
 cd heart-disease-detector
-bash start_app.sh
+bash run_hrlfm_pipeline.sh
 ```
 
 This script will:
-- Create and activate a virtual environment
-- Install all dependencies
-- Train the machine learning models
-- Launch the Streamlit application
+- ✅ Check Python installation (requires Python 3.8+)
+- ✅ Create and activate a virtual environment (`venv_hrlfm`)
+- ✅ Install all dependencies from requirements.txt
+- ✅ Verify dataset exists
+- ✅ Run the complete HRLFM training pipeline
+- ✅ Save all 8 trained models and visualizations
 
-**Note:** The script may take 5-10 minutes to complete as it trains multiple ML models.
+**Expected runtime**: 5-10 minutes depending on your hardware
 
 ### Manual Installation
+
+If you prefer to set up manually:
 
 1. **Clone the repository**
    ```bash
@@ -114,24 +110,34 @@ This script will:
    cd heart-disease-detector
    ```
 
-2. **Create a virtual environment (recommended)**
+2. **Create a virtual environment**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   python3 -m venv venv_hrlfm
+   source venv_hrlfm/bin/activate  # On Windows: venv_hrlfm\Scripts\activate
    ```
 
 3. **Install dependencies**
    ```bash
+   pip install --upgrade pip
    pip install -r requirements.txt
+   ```
+
+4. **Train the HRLFM pipeline**
+   ```bash
+   python train_hrlfm_pipeline.py
    ```
 
 ## 📊 Usage
 
-### 1. Train Models - HRLFM Pipeline (Recommended)
+### Step 1: Train the HRLFM Pipeline
 
-Run the complete HRLFM (High-Resolution Logistic-Forest Model) pipeline:
+If you haven't already run the automated script, train the models:
 
 ```bash
+# Activate virtual environment
+source venv_hrlfm/bin/activate  # On Windows: venv_hrlfm\Scripts\activate
+
+# Run the HRLFM pipeline
 python train_hrlfm_pipeline.py
 ```
 
@@ -152,62 +158,35 @@ This comprehensive pipeline will:
 
 📖 **Full documentation**: See [HRLFM_PIPELINE.md](HRLFM_PIPELINE.md) for complete details
 
-### 1a. Alternative Training Methods
-
-You can also use the legacy training scripts:
-
-```bash
-# Train on the new comprehensive dataset (10,000 records)
-python train_new_models.py
-
-# Or use the optimized training script
-python train_final_optimized_models.py
-```
-
-### 1b. Jupyter Notebook (Exploratory Analysis)
-
-```bash
-jupyter notebook notebooks/heart_disease_analysis.ipynb
-```
-
-### 2. Run the Streamlit Application
+### Step 2: Run the Streamlit Application
 
 After training the models, launch the web application:
 
 ```bash
+# Make sure virtual environment is activated
+source venv_hrlfm/bin/activate  # On Windows: venv_hrlfm\Scripts\activate
+
+# Run the Streamlit app
 streamlit run app/streamlit_app.py
-```
-
-Or use the helper script:
-
-```bash
-bash run_app.sh
 ```
 
 The app will open in your browser at `http://localhost:8501`
 
-### 3. Alternative: Use Individual Scripts
+### Step 3: Make Predictions
 
-For more control, you can use individual helper scripts:
-
-```bash
-# Train models only
-bash train_models.sh
-# OR
-python train_final_optimized_models.py
-# OR
-python train_new_models.py
-
-# Then run the app
-bash run_app.sh
-```
-
-### 4. Make Predictions
-
-1. Select a model from the sidebar
-2. Enter patient information in the form
+1. Select a model from the sidebar (8 models available)
+2. Enter patient information in the form:
+   - Age, sex, chest pain type
+   - Blood pressure, cholesterol levels
+   - ECG results, heart rate
+   - Exercise-induced symptoms
+   - And more clinical measurements
 3. Click "Predict Heart Disease Risk"
-4. View the prediction results and probability breakdown
+4. View the prediction results with:
+   - Disease probability breakdown
+   - Risk assessment (Low/High)
+   - Input summary table
+5. Explore performance metrics and visualizations in other tabs
 
 ## 🤖 Models
 
@@ -272,9 +251,9 @@ Each model is evaluated using:
 
 ## 📈 Dataset
 
-### Primary Dataset: cleaned_merged_heart_dataset.csv
+### HRLFM Dataset: cleaned_merged_heart_dataset.csv
 
-The primary dataset used for the HRLFM pipeline contains **1,888 patient records** with **14 clinical features**:
+The dataset used for the HRLFM pipeline contains **1,888 patient records** with **13 clinical features**:
 
 **Clinical Features:**
 1. **age**: Age in years (29-77)
@@ -314,55 +293,7 @@ The primary dataset used for the HRLFM pipeline contains **1,888 patient records
 - Cholesterol categories
 - Polynomial features (squared terms and interactions)
 
-### Alternative Dataset: heart_disease.csv
-
-The alternative comprehensive dataset contains **10,000 patient records** with **20 features**:
-
-**Demographics:**
-- **Age**: Age in years
-- **Gender**: Male or Female
-- **BMI**: Body Mass Index
-
-**Cardiovascular Metrics:**
-- **Blood Pressure**: Resting blood pressure (mm Hg)
-- **Cholesterol Level**: Total cholesterol (mg/dl)
-- **Triglyceride Level**: Triglycerides (mg/dl)
-- **High Blood Pressure**: Yes/No indicator
-- **Low HDL Cholesterol**: Yes/No indicator
-- **High LDL Cholesterol**: Yes/No indicator
-
-**Lifestyle Factors:**
-- **Exercise Habits**: Low, Medium, or High
-- **Smoking**: Yes/No
-- **Alcohol Consumption**: None, Low, Medium, or High
-- **Sleep Hours**: Hours of sleep per day
-- **Sugar Consumption**: Low, Medium, or High
-- **Stress Level**: Low, Medium, or High
-
-**Medical History:**
-- **Family Heart Disease**: Yes/No for family history
-- **Diabetes**: Yes/No
-- **Fasting Blood Sugar**: In mg/dl
-
-**Biomarkers:**
-- **CRP Level**: C-Reactive Protein level (mg/L) - inflammation marker
-- **Homocysteine Level**: In µmol/L - cardiovascular risk marker
-
-**Target Variable:**
-- **Heart Disease Status**: Yes (20%) or No (80%)
-
-**Engineered Features:**
-- Age_BMI_interaction
-- BP_Chol_ratio
-- Trig_Chol_ratio
-- Age_group (Young, MiddleAge, Senior, Elderly)
-- BMI_category (Underweight, Normal, Overweight, Obese)
-
-### Legacy Dataset: heart.csv
-
-The original dataset (`heart.csv`) with **303 records** is also included for reference.
-
-See `data/README.md` for detailed feature descriptions of all datasets.
+See `data/README.md` and `HRLFM_PIPELINE.md` for detailed feature descriptions.
 
 ## 🎯 Model Performance
 
@@ -405,10 +336,10 @@ The best performing model is automatically saved as `best_model.pkl`.
 The project includes unit tests to verify functionality:
 
 ```bash
-# Run all tests
-bash run_tests.sh
+# Activate virtual environment
+source venv_hrlfm/bin/activate  # On Windows: venv_hrlfm\Scripts\activate
 
-# Or run tests manually
+# Run tests
 python -m unittest discover -s tests -v
 ```
 
