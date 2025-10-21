@@ -8,7 +8,29 @@ This guide will help you get the Heart Disease Predictor up and running quickly.
 - pip (Python package manager)
 - Git
 
-## Installation Steps
+## Fastest Method: Automated Setup 🚀
+
+**Single command to setup everything:**
+
+```bash
+git clone https://github.com/Sarthaka-Mitra/heart-disease-detector.git
+cd heart-disease-detector
+bash start_app.sh
+```
+
+This will:
+1. Create a virtual environment
+2. Install all dependencies
+3. Train the ML models (takes 5-10 minutes)
+4. Launch the Streamlit app
+
+**That's it!** The app will open in your browser at `http://localhost:8501`
+
+---
+
+## Alternative: Manual Installation
+
+If you prefer to do things step-by-step or want more control:
 
 ### 1. Clone the Repository
 
@@ -17,7 +39,7 @@ git clone https://github.com/Sarthaka-Mitra/heart-disease-detector.git
 cd heart-disease-detector
 ```
 
-### 2. (Optional) Create a Virtual Environment
+### 2. Create a Virtual Environment (Recommended)
 
 **Linux/Mac:**
 ```bash
@@ -39,9 +61,30 @@ pip install -r requirements.txt
 
 ## Training Models
 
-You have two options to train the models:
+You have multiple options to train the models:
 
-### Option 1: Using Jupyter Notebook (Recommended)
+### Option 1: Python Training Script (Recommended)
+
+Train models using optimized Python scripts:
+
+```bash
+# Fastest option with pre-tuned hyperparameters
+python train_final_optimized_models.py
+
+# OR comprehensive training with feature engineering
+python train_new_models.py
+```
+
+### Option 2: Using Helper Scripts
+
+**Linux/Mac:**
+```bash
+bash train_models.sh
+```
+
+This will execute the Jupyter notebook and train models.
+
+### Option 3: Using Jupyter Notebook (For Exploratory Analysis)
 
 1. Start Jupyter:
    ```bash
@@ -54,21 +97,9 @@ You have two options to train the models:
 
 4. Models will be saved in the `models/` directory
 
-### Option 2: Using the Training Script
-
-**Linux/Mac:**
-```bash
-bash train_models.sh
-```
-
-**Windows:**
-```cmd
-python -m jupyter nbconvert --to notebook --execute notebooks/heart_disease_analysis.ipynb
-```
-
 ## Running the Application
 
-### Using the Run Script
+### Using the Run Script (Recommended)
 
 **Linux/Mac:**
 ```bash

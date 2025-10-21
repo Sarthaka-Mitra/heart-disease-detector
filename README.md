@@ -68,7 +68,9 @@ heart-disease-detector/
 ├── requirements.txt              # Python dependencies
 ├── requirements-dev.txt          # Development dependencies
 ├── setup.py                      # Package setup
+├── start_app.sh                  # 🆕 Complete setup & deployment script (recommended)
 ├── train_new_models.py           # New training script for updated dataset
+├── train_final_optimized_models.py  # Optimized training script
 ├── Dockerfile                    # Docker image configuration
 ├── docker-compose.yml            # Docker Compose configuration
 ├── .gitignore                    # Git ignore file
@@ -80,6 +82,26 @@ heart-disease-detector/
 ```
 
 ## 🛠️ Installation
+
+### Quick Start (Recommended)
+
+Use the automated setup script that handles everything in one command:
+
+```bash
+git clone https://github.com/Sarthaka-Mitra/heart-disease-detector.git
+cd heart-disease-detector
+bash start_app.sh
+```
+
+This script will:
+- Create and activate a virtual environment
+- Install all dependencies
+- Train the machine learning models
+- Launch the Streamlit application
+
+**Note:** The script may take 5-10 minutes to complete as it trains multiple ML models.
+
+### Manual Installation
 
 1. **Clone the repository**
    ```bash
@@ -133,9 +155,31 @@ After training the models, launch the web application:
 streamlit run app/streamlit_app.py
 ```
 
+Or use the helper script:
+
+```bash
+bash run_app.sh
+```
+
 The app will open in your browser at `http://localhost:8501`
 
-### 3. Make Predictions
+### 3. Alternative: Use Individual Scripts
+
+For more control, you can use individual helper scripts:
+
+```bash
+# Train models only
+bash train_models.sh
+# OR
+python train_final_optimized_models.py
+# OR
+python train_new_models.py
+
+# Then run the app
+bash run_app.sh
+```
+
+### 4. Make Predictions
 
 1. Select a model from the sidebar
 2. Enter patient information in the form
