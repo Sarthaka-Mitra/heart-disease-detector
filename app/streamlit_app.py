@@ -106,21 +106,21 @@ if models:
         index=0
     )
     model = models[selected_model_name]
+    
+    # Sidebar - Information
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 📊 About")
+    st.sidebar.info(
+        "This application predicts the likelihood of heart disease based on various clinical parameters. "
+        "The models were trained on the cleaned merged heart disease dataset with 1,888 patient records using "
+        "advanced ML techniques including HRLFM (High-Resolution Logistic-Forest Model)."
+    )
+    
+    st.sidebar.markdown("### 🎯 Model Info")
+    st.sidebar.success(f"Currently using: **{selected_model_name}**")
 else:
     st.error("No models found. Please run the training script first: `python train_hrlfm_pipeline.py`")
     st.stop()
-
-# Sidebar - Information
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 📊 About")
-st.sidebar.info(
-    "This application predicts the likelihood of heart disease based on various clinical parameters. "
-    "The models were trained on the cleaned merged heart disease dataset with 1,888 patient records using "
-    "advanced ML techniques including HRLFM (High-Resolution Logistic-Forest Model)."
-)
-
-st.sidebar.markdown("### 🎯 Model Info")
-st.sidebar.success(f"Currently using: **{selected_model_name}**")
 
 # Main content
 tab1, tab2, tab3 = st.tabs(["🔍 Prediction", "📈 Model Performance", "ℹ️ About Dataset"])
