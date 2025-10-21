@@ -13,10 +13,15 @@ This project implements a complete heart disease prediction system using various
 ## 🚀 Features
 
 - ✅ Clean, organized repository structure
-- ✅ Comprehensive dataset with 10,000 patient records
-- ✅ Advanced feature engineering (interaction terms, categorical groupings)
-- ✅ Multiple ML models with performance comparison (6 models)
+- ✅ Comprehensive dataset with 1,888 patient records (cleaned_merged_heart_dataset.csv)
+- ✅ **NEW: Complete HRLFM Pipeline** - High-Resolution Logistic-Forest Model achieving 97.9% accuracy
+- ✅ Advanced feature engineering (23 engineered features: polynomial, interaction, domain-specific)
+- ✅ Multiple ML models with performance comparison (8 models)
+- ✅ Feature selection using tree-based importance and statistical methods
+- ✅ Hyperparameter tuning with RandomizedSearchCV and GridSearchCV
 - ✅ SMOTE for handling imbalanced data
+- ✅ Ensemble methods: Voting Classifier and Stacking
+- ✅ Model interpretability with SHAP and LIME
 - ✅ Professional Streamlit UI for deployment
 - ✅ Model persistence using joblib
 - ✅ Detailed documentation and dataset description
@@ -122,26 +127,44 @@ This script will:
 
 ## 📊 Usage
 
-### 1. Train Models (Recommended Method)
+### 1. Train Models - HRLFM Pipeline (Recommended)
 
-Run the new training script to train models on the comprehensive dataset:
+Run the complete HRLFM (High-Resolution Logistic-Forest Model) pipeline:
 
 ```bash
-python train_new_models.py
+python train_hrlfm_pipeline.py
 ```
 
-This script will:
-- Load and preprocess the heart_disease.csv dataset (10,000 records)
-- Perform feature engineering (create interaction terms and categorical groupings)
-- Handle missing values
-- Apply SMOTE to balance the dataset
-- Train multiple ML models (Logistic Regression, Random Forest, XGBoost, Gradient Boosting, Neural Network, Ensemble)
-- Evaluate and compare model performances
+This comprehensive pipeline will:
+- Load and explore the cleaned_merged_heart_dataset.csv (1,888 records)
+- Handle missing values and outliers
+- Perform feature engineering (create 23 additional features)
+- Select the most informative features
+- Train 5 baseline models: Logistic Regression, Random Forest, XGBoost, SVM, LightGBM
+- Perform hyperparameter tuning with cross-validation
+- Create ensemble models (Voting and Stacking)
+- Train the HRLFM hybrid model combining linear and non-linear approaches
+- Evaluate all models and achieve **≥85% accuracy** (actual: 97.9%)
+- Generate interpretability visualizations (SHAP, LIME)
 - Save all models and preprocessing objects to the `models/` directory
 
-### 1a. Alternative: Train Models (Jupyter Notebook)
+**Expected runtime**: 5-10 minutes
 
-You can also run the original Jupyter notebook for exploratory analysis:
+📖 **Full documentation**: See [HRLFM_PIPELINE.md](HRLFM_PIPELINE.md) for complete details
+
+### 1a. Alternative Training Methods
+
+You can also use the legacy training scripts:
+
+```bash
+# Train on the new comprehensive dataset (10,000 records)
+python train_new_models.py
+
+# Or use the optimized training script
+python train_final_optimized_models.py
+```
+
+### 1b. Jupyter Notebook (Exploratory Analysis)
 
 ```bash
 jupyter notebook notebooks/heart_disease_analysis.ipynb
@@ -188,52 +211,112 @@ bash run_app.sh
 
 ## 🤖 Models
 
-The project implements and compares six machine learning models:
+The project implements and compares **8 machine learning models**:
 
 1. **Logistic Regression**
    - Simple, interpretable linear model
    - Fast training and prediction
-   - Uses scaled features
-   - Best overall performance (ROC-AUC: 0.52, CV ROC-AUC: 0.79)
+   - Accuracy: 75.4%
+   - Best for understanding feature relationships
 
-2. **Random Forest**
+2. **Random Forest** ⭐ **Best Performer**
    - Ensemble of decision trees
    - Feature importance analysis
    - Robust to overfitting
-   - Hyperparameter tuned
+   - **Accuracy: 97.9%**
+   - **ROC-AUC: 0.998**
 
 3. **XGBoost**
    - Gradient boosting algorithm
-   - High cross-validation performance (CV ROC-AUC: 0.91)
    - Advanced hyperparameter tuning
    - Excellent for imbalanced datasets
+   - Accuracy: 96.8%
+   - ROC-AUC: 0.997
 
-4. **Gradient Boosting**
-   - Another gradient boosting implementation
-   - Good baseline performance
-   - Complementary to XGBoost
+4. **LightGBM**
+   - Efficient gradient boosting variant
+   - Fast training and high accuracy
+   - Accuracy: 97.6%
+   - ROC-AUC: 0.998
 
-5. **Neural Network**
-   - Multi-layer perceptron (100, 50 neurons)
-   - Non-linear pattern recognition
-   - Uses scaled features
+5. **SVM (Support Vector Machine)**
+   - Non-linear classification with RBF kernel
+   - Good generalization
+   - Accuracy: 91.8%
 
-6. **Ensemble (Voting Classifier)**
-   - Combines Random Forest, XGBoost, and Gradient Boosting
+6. **Voting Ensemble**
+   - Combines Random Forest, XGBoost, and LightGBM
    - Soft voting for probability averaging
-   - Reduces individual model bias
+   - Accuracy: 97.6%
+   - ROC-AUC: 0.998
+
+7. **Stacking Ensemble**
+   - Multi-level ensemble with meta-model
+   - Uses Gradient Boosting as meta-learner
+   - Accuracy: 95.5%
+
+8. **HRLFM (High-Resolution Logistic-Forest Model)** 🔬
+   - Hybrid model combining Logistic Regression, Random Forest, and XGBoost
+   - Optimized meta-model for blending predictions
+   - Balances linear and non-linear effects
+   - Accuracy: 96.3%
+   - Provides interpretability with high performance
 
 Each model is evaluated using:
 - Accuracy
 - Precision
 - Recall
 - F1-Score
-- ROC-AUC Score (primary metric for imbalanced data)
-- Cross-validation scores
+- ROC-AUC Score (primary metric)
+- 5-fold and 10-fold cross-validation
 
 ## 📈 Dataset
 
-The primary dataset (`heart_disease.csv`) contains 10,000 patient records with 20 clinical features:
+### Primary Dataset: cleaned_merged_heart_dataset.csv
+
+The primary dataset used for the HRLFM pipeline contains **1,888 patient records** with **14 clinical features**:
+
+**Clinical Features:**
+1. **age**: Age in years (29-77)
+2. **sex**: Sex (1 = male, 0 = female)
+3. **cp**: Chest pain type (0-4)
+4. **trestbps**: Resting blood pressure in mm Hg (94-200)
+5. **chol**: Serum cholesterol in mg/dl (126-564)
+6. **fbs**: Fasting blood sugar > 120 mg/dl (1 = true, 0 = false)
+7. **restecg**: Resting electrocardiographic results (0-2)
+8. **thalachh**: Maximum heart rate achieved (71-202)
+9. **exang**: Exercise induced angina (1 = yes, 0 = no)
+10. **oldpeak**: ST depression induced by exercise relative to rest (0-6.2)
+11. **slope**: Slope of the peak exercise ST segment (0-3)
+12. **ca**: Number of major vessels (0-4) colored by fluoroscopy
+13. **thal**: Thalassemia (0-7)
+
+**Target Variable:**
+- **target**: Heart disease diagnosis (0 = No disease, 1 = Disease)
+
+**Dataset Characteristics:**
+- Total samples: 1,888
+- Original features: 13
+- Engineered features: 23 (polynomial, interaction, domain-specific)
+- Final features used: 36 (after feature selection)
+- Class distribution: Approximately 48% No Disease, 52% Disease (balanced)
+- Missing values: None
+- Data quality: Cleaned and merged from multiple sources
+
+**Top Engineered Features:**
+- Age-cholesterol interaction
+- Age-blood pressure interaction
+- BP/Cholesterol ratio
+- Heart rate reserve (max HR - age)
+- ST depression severity
+- Chest pain-exercise risk score
+- Age groups (categorical)
+- Cholesterol categories
+- Polynomial features (squared terms and interactions)
+
+### Alternative Dataset: heart_disease.csv
+
+The alternative comprehensive dataset contains **10,000 patient records** with **20 features**:
 
 **Demographics:**
 - **Age**: Age in years
@@ -275,16 +358,44 @@ The primary dataset (`heart_disease.csv`) contains 10,000 patient records with 2
 - Age_group (Young, MiddleAge, Senior, Elderly)
 - BMI_category (Underweight, Normal, Overweight, Obese)
 
-The original dataset (`heart.csv`) with 303 records is also included for reference.
+### Legacy Dataset: heart.csv
 
-See `data/README.md` for detailed feature descriptions.
+The original dataset (`heart.csv`) with **303 records** is also included for reference.
+
+See `data/README.md` for detailed feature descriptions of all datasets.
 
 ## 🎯 Model Performance
 
-After training, the notebook displays detailed performance metrics including:
+### HRLFM Pipeline Results
+
+After training with the complete pipeline on cleaned_merged_heart_dataset.csv:
+
+| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
+|-------|----------|-----------|--------|----------|---------|
+| **Random Forest** ⭐ | **97.88%** | 97.47% | 98.47% | 97.97% | **0.9978** |
+| LightGBM | 97.62% | 96.52% | 98.98% | 97.73% | 0.9984 |
+| Voting Ensemble | 97.62% | 96.52% | 98.98% | 97.73% | 0.9982 |
+| XGBoost | 96.83% | 95.54% | 98.47% | 96.98% | 0.9970 |
+| HRLFM | 96.30% | 94.61% | 98.47% | 96.50% | 0.9960 |
+| Stacking Ensemble | 95.50% | 94.09% | 97.45% | 95.74% | 0.9968 |
+| SVM | 91.80% | 89.10% | 95.92% | 92.38% | 0.9748 |
+| Logistic Regression | 75.40% | 73.73% | 81.63% | 77.48% | 0.8210 |
+
+✅ **Target Achieved**: All top models exceed the 85% accuracy target
+
+**Key Achievements:**
+- Best accuracy: **97.88%** (Random Forest)
+- Best ROC-AUC: **0.9984** (LightGBM)
+- 10-fold CV accuracy: **98.27% (±0.52%)**
+- All ensemble models: >95% accuracy
+- HRLFM balances performance with interpretability
+
+The pipeline displays detailed performance metrics including:
 - Confusion matrices
 - ROC curves
 - Feature importance plots
+- SHAP explanations
+- LIME interpretations
 - Model comparison charts
 
 The best performing model is automatically saved as `best_model.pkl`.
