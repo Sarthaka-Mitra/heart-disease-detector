@@ -148,4 +148,4 @@ Feel free to open an issue for any questions about contributing!
 - Focus on constructive feedback
 - Collaborate openly
 
-Thank you for contributing to Heart Disease Predictor! 🫀
+Thank you for contributing to Heart Disease Predictor!

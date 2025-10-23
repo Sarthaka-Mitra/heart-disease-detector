@@ -1,8 +1,8 @@
-# Heart Disease Detector 🫀
+# Heart Disease Detector
 
 A comprehensive machine learning project for predicting heart disease using the High-Resolution Logistic-Forest Model (HRLFM) pipeline with a professional Streamlit web interface.
 
-## 📋 Overview
+## Overview
 
 This project implements the **HRLFM (High-Resolution Logistic-Forest Model)** pipeline - a complete heart disease prediction system achieving **97.9% accuracy**. It includes:
 - **8 ML Models**: Logistic Regression, Random Forest, XGBoost, LightGBM, SVM, Voting Ensemble, Stacking Ensemble, and HRLFM
@@ -11,25 +11,25 @@ This project implements the **HRLFM (High-Resolution Logistic-Forest Model)** pi
 - **Web Application**: Interactive Streamlit app for real-time predictions
 - **Automated Setup**: Single bash script to setup and run the entire pipeline
 
-## 🚀 Features
+## Features
 
-- ✅ **HRLFM Pipeline** - High-Resolution Logistic-Forest Model achieving 97.9% accuracy
-- ✅ Clean, focused repository structure (only HRLFM pipeline components)
-- ✅ Comprehensive dataset with 1,888 patient records (cleaned_merged_heart_dataset.csv)
-- ✅ Advanced feature engineering (23 engineered features: polynomial, interaction, domain-specific)
-- ✅ 8 ML models with performance comparison
-- ✅ Feature selection using tree-based importance and statistical methods
-- ✅ Hyperparameter tuning with RandomizedSearchCV and GridSearchCV
-- ✅ SMOTE for handling imbalanced data
-- ✅ Ensemble methods: Voting Classifier and Stacking
-- ✅ Model interpretability with SHAP and LIME
-- ✅ Professional Streamlit UI for deployment
-- ✅ Automated bash script for virtual environment setup and pipeline execution
-- ✅ Model persistence using joblib
-- ✅ Detailed documentation and dataset description
-- ✅ Unit tests for code validation
+- **HRLFM Pipeline** - High-Resolution Logistic-Forest Model achieving 97.9% accuracy
+- Clean, focused repository structure (only HRLFM pipeline components)
+- Comprehensive dataset with 1,888 patient records (cleaned_merged_heart_dataset.csv)
+- Advanced feature engineering (23 engineered features: polynomial, interaction, domain-specific)
+- 8 ML models with performance comparison
+- Feature selection using tree-based importance and statistical methods
+- Hyperparameter tuning with RandomizedSearchCV and GridSearchCV
+- SMOTE for handling imbalanced data
+- Ensemble methods: Voting Classifier and Stacking
+- Model interpretability with SHAP and LIME
+- Professional Streamlit UI for deployment
+- Automated bash script for virtual environment setup and pipeline execution
+- Model persistence using joblib
+- Detailed documentation and dataset description
+- Unit tests for code validation
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 heart-disease-detector/
@@ -66,7 +66,7 @@ heart-disease-detector/
 ├── requirements.txt              # Python dependencies
 ├── requirements-dev.txt          # Development dependencies
 ├── setup.py                      # Package setup
-├── run_hrlfm_pipeline.sh         # 🆕 Automated setup & pipeline execution script
+├── run_hrlfm_pipeline.sh         # Automated setup & pipeline execution script
 ├── train_hrlfm_pipeline.py       # HRLFM pipeline training script
 ├── Dockerfile                    # Docker image configuration
 ├── docker-compose.yml            # Docker Compose configuration
@@ -78,7 +78,7 @@ heart-disease-detector/
 └── README.md                     # This file
 ```
 
-## 🛠️ Installation & Quick Start
+## Installation & Quick Start
 
 ### Automated Setup (Recommended)
 
@@ -91,12 +91,12 @@ bash run_hrlfm_pipeline.sh
 ```
 
 This script will:
-- ✅ Check Python installation (requires Python 3.8+)
-- ✅ Create and activate a virtual environment (`venv_hrlfm`)
-- ✅ Install all dependencies from requirements.txt
-- ✅ Verify dataset exists
-- ✅ Run the complete HRLFM training pipeline
-- ✅ Save all 8 trained models and visualizations
+- Check Python installation (requires Python 3.8+)
+- Create and activate a virtual environment (`venv_hrlfm`)
+- Install all dependencies from requirements.txt
+- Verify dataset exists
+- Run the complete HRLFM training pipeline
+- Save all 8 trained models and visualizations
 
 **Expected runtime**: 5-10 minutes depending on your hardware
 
@@ -127,7 +127,7 @@ If you prefer to set up manually:
    python train_hrlfm_pipeline.py
    ```
 
-## 📊 Usage
+## Usage
 
 ### Step 1: Train the HRLFM Pipeline
 
@@ -156,7 +156,7 @@ This comprehensive pipeline will:
 
 **Expected runtime**: 5-10 minutes
 
-📖 **Full documentation**: See [HRLFM_PIPELINE.md](HRLFM_PIPELINE.md) for complete details
+**Full documentation**: See [HRLFM_PIPELINE.md](HRLFM_PIPELINE.md) for complete details
 
 ### Step 2: Run the Streamlit Application
 
@@ -188,7 +188,7 @@ The app will open in your browser at `http://localhost:8501`
    - Input summary table
 5. Explore performance metrics and visualizations in other tabs
 
-## 🤖 Models
+## Models
 
 The project implements and compares **8 machine learning models**:
 
@@ -198,7 +198,7 @@ The project implements and compares **8 machine learning models**:
    - Accuracy: 75.4%
    - Best for understanding feature relationships
 
-2. **Random Forest** ⭐ **Best Performer**
+2. **Random Forest** - **Best Performer**
    - Ensemble of decision trees
    - Feature importance analysis
    - Robust to overfitting
@@ -234,7 +234,7 @@ The project implements and compares **8 machine learning models**:
    - Uses Gradient Boosting as meta-learner
    - Accuracy: 95.5%
 
-8. **HRLFM (High-Resolution Logistic-Forest Model)** 🔬
+8. **HRLFM (High-Resolution Logistic-Forest Model)**
    - Hybrid model combining Logistic Regression, Random Forest, and XGBoost
    - Optimized meta-model for blending predictions
    - Balances linear and non-linear effects
@@ -249,7 +249,7 @@ Each model is evaluated using:
 - ROC-AUC Score (primary metric)
 - 5-fold and 10-fold cross-validation
 
-## 📈 Dataset
+## Dataset
 
 ### HRLFM Dataset: cleaned_merged_heart_dataset.csv
 
@@ -295,7 +295,7 @@ The dataset used for the HRLFM pipeline contains **1,888 patient records** with 
 
 See `data/README.md` and `HRLFM_PIPELINE.md` for detailed feature descriptions.
 
-## 🎯 Model Performance
+## Model Performance
 
 ### HRLFM Pipeline Results
 
@@ -303,7 +303,7 @@ After training with the complete pipeline on cleaned_merged_heart_dataset.csv:
 
 | Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
 |-------|----------|-----------|--------|----------|---------|
-| **Random Forest** ⭐ | **97.88%** | 97.47% | 98.47% | 97.97% | **0.9978** |
+| **Random Forest** | **97.88%** | 97.47% | 98.47% | 97.97% | **0.9978** |
 | LightGBM | 97.62% | 96.52% | 98.98% | 97.73% | 0.9984 |
 | Voting Ensemble | 97.62% | 96.52% | 98.98% | 97.73% | 0.9982 |
 | XGBoost | 96.83% | 95.54% | 98.47% | 96.98% | 0.9970 |
@@ -312,7 +312,7 @@ After training with the complete pipeline on cleaned_merged_heart_dataset.csv:
 | SVM | 91.80% | 89.10% | 95.92% | 92.38% | 0.9748 |
 | Logistic Regression | 75.40% | 73.73% | 81.63% | 77.48% | 0.8210 |
 
-✅ **Target Achieved**: All top models exceed the 85% accuracy target
+**Target Achieved**: All top models exceed the 85% accuracy target
 
 **Key Achievements:**
 - Best accuracy: **97.88%** (Random Forest)
@@ -331,7 +331,7 @@ The pipeline displays detailed performance metrics including:
 
 The best performing model is automatically saved as `best_model.pkl`.
 
-## 🧪 Testing
+## Testing
 
 The project includes unit tests to verify functionality:
 
@@ -354,7 +354,7 @@ For development testing, install additional dependencies:
 pip install -r requirements-dev.txt
 ```
 
-## 🐳 Docker Support
+## Docker Support
 
 Build and run with Docker:
 
@@ -369,7 +369,7 @@ docker run -p 8501:8501 heart-disease-predictor
 docker-compose up
 ```
 
-## 🌐 Deployment
+## Deployment
 
 The Streamlit app is ready for deployment on platforms like:
 - [Streamlit Cloud](https://streamlit.io/cloud)
@@ -385,22 +385,22 @@ The Streamlit app is ready for deployment on platforms like:
 4. Set the main file path: `app/streamlit_app.py`
 5. Deploy!
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This application is for educational and research purposes only. It should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare professionals for medical concerns.
 
-## 📝 License
+## License
 
 This project is open source and available under the MIT License.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📧 Contact
+## Contact
 
 For questions or feedback, please open an issue on GitHub.
 
 ---
 
-**Built with ❤️ using Python, Scikit-learn, XGBoost, and Streamlit**
+**Built using Python, Scikit-learn, XGBoost, and Streamlit**
