@@ -24,13 +24,13 @@ bash run_hrlfm_pipeline.sh
 ```
 
 **What this script does:**
-1. ✅ Checks if Python 3.8+ is installed
-2. ✅ Creates a virtual environment (`venv_hrlfm`)
-3. ✅ Installs all required dependencies
-4. ✅ Verifies the dataset exists
-5. ✅ Runs the complete HRLFM training pipeline
-6. ✅ Saves 8 trained models to the `models/` directory
-7. ✅ Generates visualizations and performance metrics
+1. Checks if Python 3.8+ is installed
+2. Creates a virtual environment (`venv_hrlfm`)
+3. Installs all required dependencies
+4. Verifies the dataset exists
+5. Runs the complete HRLFM training pipeline
+6. Saves 8 trained models to the `models/` directory
+7. Generates visualizations and performance metrics
 
 **Expected output:**
 - 8 trained models (`.pkl` files)
@@ -119,7 +119,7 @@ streamlit run app/streamlit_app.py
 
 The pipeline trains 8 models:
 1. Logistic Regression
-2. Random Forest ⭐ (Best: 97.88% accuracy)
+2. Random Forest - Best: 97.88% accuracy
 3. XGBoost
 4. LightGBM
 5. SVM
@@ -239,12 +239,12 @@ heart-disease-detector/
 
 ## Important Notes
 
-⚠️ **Medical Disclaimer**: This tool is for educational and research purposes only. Do not use it as a substitute for professional medical advice, diagnosis, or treatment.
+**Medical Disclaimer**: This tool is for educational and research purposes only. Do not use it as a substitute for professional medical advice, diagnosis, or treatment.
 
-✅ **Model Performance**: All models achieve >85% accuracy, with Random Forest achieving 97.88%
+**Model Performance**: All models achieve >85% accuracy, with Random Forest achieving 97.88%
 
-🔒 **Privacy**: All processing happens locally. No data is sent to external servers.
+**Privacy**: All processing happens locally. No data is sent to external servers.
 
 ---
 
-**Built with ❤️ using Python, Scikit-learn, XGBoost, LightGBM, and Streamlit**
+**Built using Python, Scikit-learn, XGBoost, LightGBM, and Streamlit**

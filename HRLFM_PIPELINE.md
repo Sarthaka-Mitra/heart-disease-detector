@@ -187,7 +187,7 @@ All models trained with RandomizedSearchCV (20 iterations, 5-fold CV):
 - Best params: n_estimators=150, max_depth=3, learning_rate=0.1
 
 **Performance**:
-- **Accuracy: 96.30%** ✅ (exceeds 85% target)
+- **Accuracy: 96.30%** (exceeds 85% target)
 - Precision: 94.61%
 - Recall: 98.47%
 - F1-Score: 96.50%
@@ -265,7 +265,7 @@ accuracy                             0.98       378
 1. **Prediction Interface**
    - User-friendly form for entering 13 clinical measurements
    - Real-time prediction with probability breakdown
-   - Visual risk assessment (Low Risk ✅ / High Risk ⚠️)
+   - Visual risk assessment (Low Risk / High Risk)
    - Input summary table
 
 2. **Model Selection**
@@ -309,17 +309,17 @@ patient = {
 
 ## Key Achievements
 
-✅ **Target Accuracy Met**: 97.88% (target: ≥85%)
-✅ **Multiple Models**: 8 models trained and compared
-✅ **Feature Engineering**: 23 engineered features
-✅ **Hyperparameter Tuning**: All models optimized
-✅ **Ensemble Methods**: Voting and Stacking implemented
-✅ **HRLFM**: Hybrid model successfully implemented
-✅ **Interpretability**: SHAP and LIME explanations
-✅ **Model Persistence**: All models and objects saved
-✅ **Web Application**: Interactive Streamlit app created
-✅ **Modular Code**: Clean, well-documented, reproducible
-✅ **Comprehensive Evaluation**: Multiple metrics, cross-validation
+**Target Accuracy Met**: 97.88% (target: ≥85%)
+**Multiple Models**: 8 models trained and compared
+**Feature Engineering**: 23 engineered features
+**Hyperparameter Tuning**: All models optimized
+**Ensemble Methods**: Voting and Stacking implemented
+**HRLFM**: Hybrid model successfully implemented
+**Interpretability**: SHAP and LIME explanations
+**Model Persistence**: All models and objects saved
+**Web Application**: Interactive Streamlit app created
+**Modular Code**: Clean, well-documented, reproducible
+**Comprehensive Evaluation**: Multiple metrics, cross-validation
 
 ## Technical Details
 
@@ -425,4 +425,4 @@ For questions or issues, please open a GitHub issue.
 
 ---
 
-**Built with ❤️ using Python, Scikit-learn, XGBoost, LightGBM, and Streamlit**
+**Built using Python, Scikit-learn, XGBoost, LightGBM, and Streamlit**
