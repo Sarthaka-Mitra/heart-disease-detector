@@ -577,11 +577,11 @@ class HeartDiseasePipeline:
         for model_name, metrics in self.results.items():
             comparison_data.append({
                 'Model': model_name,
-                'Accuracy': metrics['accuracy'],
-                'Precision': metrics['precision'],
-                'Recall': metrics['recall'],
-                'F1-Score': metrics['f1'],
-                'ROC-AUC': metrics['roc_auc']
+                'Accuracy': round(metrics['accuracy'], 4),
+                'Precision': round(metrics['precision'], 4),
+                'Recall': round(metrics['recall'], 4),
+                'F1-Score': round(metrics['f1'], 4),
+                'ROC-AUC': round(metrics['roc_auc'], 4)
             })
         
         comparison_df = pd.DataFrame(comparison_data)
@@ -675,11 +675,13 @@ class HeartDiseasePipeline:
         joblib.dump(self.selected_features, 'models/feature_names.pkl')
         print(f"  ✓ Saved feature names to models/feature_names.pkl")
         
-        # Save test dataset
+        # Save test dataset (unscaled - scaler should be applied when loading)
+        # Note: The test dataset contains raw engineered features (before scaling).
+        # To use for predictions, apply the saved scaler and select the saved feature_names.
         test_df = pd.DataFrame(self.X_test, columns=self.feature_names)
         test_df['target'] = self.y_test.values
         test_df.to_csv('data/test_dataset.csv', index=False)
-        print(f"  ✓ Saved test dataset to data/test_dataset.csv")
+        print(f"  ✓ Saved test dataset to data/test_dataset.csv (unscaled - apply scaler.pkl before use)")
         
         return self
 
