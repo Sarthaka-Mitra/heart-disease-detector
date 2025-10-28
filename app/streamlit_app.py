@@ -63,18 +63,8 @@ def load_models():
             models['Logistic Regression'] = joblib.load(model_path / 'logistic_regression_model.pkl')
         if (model_path / 'random_forest_model.pkl').exists():
             models['Random Forest'] = joblib.load(model_path / 'random_forest_model.pkl')
-        if (model_path / 'xgboost_model.pkl').exists():
-            models['XGBoost'] = joblib.load(model_path / 'xgboost_model.pkl')
-        if (model_path / 'lightgbm_model.pkl').exists():
-            models['LightGBM'] = joblib.load(model_path / 'lightgbm_model.pkl')
-        if (model_path / 'svm_model.pkl').exists():
-            models['SVM'] = joblib.load(model_path / 'svm_model.pkl')
-        if (model_path / 'voting_ensemble_model.pkl').exists():
-            models['Voting Ensemble'] = joblib.load(model_path / 'voting_ensemble_model.pkl')
-        if (model_path / 'stacking_ensemble_model.pkl').exists():
-            models['Stacking Ensemble'] = joblib.load(model_path / 'stacking_ensemble_model.pkl')
         if (model_path / 'hrlfm_model.pkl').exists():
-            models['HRLFM (Best)'] = joblib.load(model_path / 'hrlfm_model.pkl')
+            models['HRLFM'] = joblib.load(model_path / 'hrlfm_model.pkl')
         if (model_path / 'best_model.pkl').exists():
             models['Best Model'] = joblib.load(model_path / 'best_model.pkl')
     except Exception as e:
@@ -470,35 +460,119 @@ with tab2:
     
     st.markdown("""
     ---
-    ### Evaluation Metrics Explained:
+    ### 📚 Evaluation Metrics Explained
     
-    - **Accuracy**: Overall correctness of predictions (correct predictions / total predictions)
-    - **Precision**: Proportion of positive predictions that were correct (true positives / predicted positives)
-    - **Recall**: Proportion of actual positives that were identified (true positives / actual positives)
-    - **F1-Score**: Harmonic mean of precision and recall (balanced metric)
-    - **ROC-AUC**: Area under the ROC curve - measures model's ability to distinguish between classes
+    Understanding the performance metrics used to evaluate our heart disease prediction models:
+    
+    #### **Accuracy**
+    The proportion of correct predictions (both positive and negative) among the total number of cases examined.
+    
+    **Formula:**
+    ```
+    Accuracy = (TP + TN) / (TP + TN + FP + FN)
+    ```
+    
+    Where:
+    - TP = True Positives (correctly predicted disease cases)
+    - TN = True Negatives (correctly predicted non-disease cases)
+    - FP = False Positives (incorrectly predicted disease cases)
+    - FN = False Negatives (incorrectly predicted non-disease cases)
+    
+    **Interpretation:** Higher is better. 90% accuracy means the model correctly predicts 90 out of 100 cases.
+    
+    ---
+    
+    #### **Precision** (Positive Predictive Value)
+    The proportion of positive predictions that were actually correct. It answers: "Of all the patients we predicted have heart disease, how many actually have it?"
+    
+    **Formula:**
+    ```
+    Precision = TP / (TP + FP)
+    ```
+    
+    **Interpretation:** Higher is better. High precision means fewer false alarms. Important when the cost of false positives is high.
+    
+    ---
+    
+    #### **Recall** (Sensitivity or True Positive Rate)
+    The proportion of actual positive cases that were correctly identified. It answers: "Of all the patients who actually have heart disease, how many did we correctly identify?"
+    
+    **Formula:**
+    ```
+    Recall = TP / (TP + FN)
+    ```
+    
+    **Interpretation:** Higher is better. High recall means we catch most disease cases. Critical in medical diagnosis where missing a disease case (false negative) can be dangerous.
+    
+    ---
+    
+    #### **F1-Score**
+    The harmonic mean of precision and recall, providing a single score that balances both metrics.
+    
+    **Formula:**
+    ```
+    F1-Score = 2 × (Precision × Recall) / (Precision + Recall)
+    ```
+    
+    Or equivalently:
+    ```
+    F1-Score = 2TP / (2TP + FP + FN)
+    ```
+    
+    **Interpretation:** Higher is better. F1-Score is useful when you need to balance precision and recall. It reaches its best value at 1 (perfect precision and recall) and worst at 0.
+    
+    ---
+    
+    #### **ROC-AUC** (Area Under the Receiver Operating Characteristic Curve)
+    Measures the model's ability to distinguish between classes across all possible classification thresholds.
+    
+    **ROC Curve:** Plots True Positive Rate (Recall) vs False Positive Rate at various threshold settings.
+    
+    **Formula for False Positive Rate:**
+    ```
+    FPR = FP / (FP + TN)
+    ```
+    
+    **AUC Interpretation:**
+    - AUC = 1.0: Perfect classifier
+    - AUC = 0.9-1.0: Excellent
+    - AUC = 0.8-0.9: Good
+    - AUC = 0.7-0.8: Fair
+    - AUC = 0.5: No better than random guessing
+    
+    The ROC-AUC score represents the probability that the model ranks a random positive example higher than a random negative example.
+    
+    ---
+    
+    ### 🎯 Choosing the Right Metric
+    
+    - **Accuracy**: Use when classes are balanced and all types of errors are equally important
+    - **Precision**: Use when false positives are costly (e.g., unnecessary treatments)
+    - **Recall**: Use when false negatives are costly (e.g., missing a disease diagnosis)
+    - **F1-Score**: Use when you need a balance between precision and recall
+    - **ROC-AUC**: Use to evaluate overall model performance across all thresholds; best for comparing models
     
     ### Models Overview:
     
-    1. **Logistic Regression**: Fast, interpretable linear model suitable for understanding feature relationships
-    2. **Random Forest**: Robust ensemble method with excellent performance on this dataset (97.9% accuracy)
-    3. **XGBoost**: Advanced gradient boosting with strong predictive power (96.8% accuracy)
-    4. **LightGBM**: Efficient gradient boosting variant (97.6% accuracy)
-    5. **SVM**: Support Vector Machine with non-linear kernel (91.8% accuracy)
-    6. **Voting Ensemble**: Combines predictions from multiple models using soft voting (97.6% accuracy)
-    7. **Stacking Ensemble**: Uses meta-model to combine base model predictions (95.5% accuracy)
-    8. **HRLFM**: High-Resolution Logistic-Forest Model - Hybrid approach combining linear and 
-       non-linear models with optimized meta-learning (96.3% accuracy)
+    1. **Logistic Regression**: Fast, interpretable linear model suitable for understanding feature relationships. 
+       Provides baseline performance and helps identify important risk factors.
+    
+    2. **Random Forest**: Robust ensemble method combining multiple decision trees. Excellent performance 
+       through averaging predictions and reducing overfitting. Strong at capturing non-linear relationships.
+    
+    3. **HRLFM (High-Resolution Logistic-Forest Model)**: Hybrid approach combining Logistic Regression 
+       and Random Forest through ensemble voting. Balances linear interpretability with non-linear 
+       predictive power for robust, explainable predictions.
     
     ### Training Details:
     
     - **Dataset**: 1,888 patient records from cleaned merged heart disease dataset
     - **Features**: 13 original + 23 engineered = 36 selected features
     - **Cross-Validation**: 5-fold stratified cross-validation
-    - **Hyperparameter Tuning**: RandomizedSearchCV and GridSearchCV
+    - **Hyperparameter Tuning**: RandomizedSearchCV
     - **Class Balancing**: SMOTE (Synthetic Minority Over-sampling Technique)
     - **Feature Scaling**: RobustScaler (less sensitive to outliers)
-    - **Target Achievement**: ✅ Exceeded 85% accuracy target (best model: 97.9%)
+    - **Target Achievement**: ✅ Exceeded 85% accuracy target
     """)
 
 with tab3:
@@ -561,21 +635,23 @@ with tab3:
     
     #### Models Available:
     
-    1. **Logistic Regression**: Linear model for interpretable predictions
-    2. **Random Forest**: Ensemble of decision trees (97.9% accuracy)
-    3. **XGBoost**: Gradient boosting algorithm (96.8% accuracy)
-    4. **LightGBM**: Light gradient boosting (97.6% accuracy)
-    5. **SVM**: Support Vector Machine with RBF kernel (91.8% accuracy)
-    6. **Voting Ensemble**: Soft voting of top models (97.6% accuracy)
-    7. **Stacking Ensemble**: Meta-model stacking approach (95.5% accuracy)
-    8. **HRLFM (Best)**: High-Resolution Logistic-Forest Model - Hybrid approach combining 
-       Logistic Regression, Random Forest, and XGBoost with meta-model optimization (96.3% accuracy)
+    1. **Logistic Regression**: Linear model for interpretable predictions. Uses logistic function 
+       to model the probability of heart disease based on input features. Fast and provides 
+       insights into which features contribute most to predictions.
+    
+    2. **Random Forest**: Ensemble of decision trees that vote on the final prediction. Creates 
+       multiple decision trees using random subsets of features and data, then averages their 
+       predictions. Robust and handles non-linear relationships well.
+    
+    3. **HRLFM (High-Resolution Logistic-Forest Model)**: Hybrid ensemble combining Logistic 
+       Regression and Random Forest. Uses weighted voting to balance linear interpretability 
+       with non-linear predictive power, providing both accuracy and explainability.
     
     #### Model Performance:
     - All models achieved >75% accuracy
-    - Top models achieved >96% accuracy
+    - Models were trained with hyperparameter tuning
     - HRLFM provides balanced performance with high interpretability
-    - ROC-AUC scores >0.99 for top models
+    - Cross-validated to ensure robust performance
     """)
     
     # Display model comparison if available
