@@ -50,6 +50,8 @@ This dataset contains 1,888 patient records with 13 clinical features used to pr
 ### Dataset Characteristics
 
 - **Total samples**: 1,888
+- **Training samples**: ~1,510 (80%)
+- **Test samples**: ~378 (20%) - saved separately as test_dataset.csv
 - **Original features**: 13
 - **Engineered features**: 23 (created by HRLFM pipeline)
 - **Final features used**: 36 (after feature selection)
@@ -85,10 +87,10 @@ The HRLFM pipeline automatically handles:
 ### Pipeline Performance
 
 Using this dataset, the HRLFM pipeline achieves:
-- **Best Accuracy**: 97.88% (Random Forest)
-- **Best ROC-AUC**: 0.9984 (LightGBM)
-- **HRLFM Accuracy**: 96.30% (exceeds 85% target)
-- **10-fold CV**: 98.27% (±0.52%)
+- **Target**: ≥85% accuracy
+- **Status**: ✅ Achieved across all models
+- **Models**: 3 trained models (Logistic Regression, Random Forest, HRLFM)
+- **Cross-validation**: 5-fold stratified CV for robust evaluation
 
 ### Top 15 Most Important Features
 

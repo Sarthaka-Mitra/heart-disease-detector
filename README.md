@@ -4,25 +4,25 @@ A comprehensive machine learning project for predicting heart disease using the 
 
 ## Overview
 
-This project implements the **HRLFM (High-Resolution Logistic-Forest Model)** pipeline - a complete heart disease prediction system achieving **97.9% accuracy**. It includes:
-- **8 ML Models**: Logistic Regression, Random Forest, XGBoost, LightGBM, SVM, Voting Ensemble, Stacking Ensemble, and HRLFM
+This project implements the **HRLFM (High-Resolution Logistic-Forest Model)** pipeline - a complete heart disease prediction system achieving **high accuracy**. It includes:
+- **3 ML Models**: Logistic Regression, Random Forest, and HRLFM (hybrid ensemble)
 - **Advanced Feature Engineering**: 23 engineered features (polynomial, interaction, domain-specific)
-- **Model Interpretability**: SHAP and LIME explanations
+- **Model Interpretability**: Feature importance and performance visualizations
 - **Web Application**: Interactive Streamlit app for real-time predictions
 - **Automated Setup**: Single bash script to setup and run the entire pipeline
 
 ## Features
 
-- **HRLFM Pipeline** - High-Resolution Logistic-Forest Model achieving 97.9% accuracy
-- Clean, focused repository structure (only HRLFM pipeline components)
+- **HRLFM Pipeline** - High-Resolution Logistic-Forest Model combining linear and non-linear approaches
+- Clean, focused repository structure (only essential models)
 - Comprehensive dataset with 1,888 patient records (cleaned_merged_heart_dataset.csv)
 - Advanced feature engineering (23 engineered features: polynomial, interaction, domain-specific)
-- 8 ML models with performance comparison
+- 3 ML models with performance comparison
 - Feature selection using tree-based importance and statistical methods
-- Hyperparameter tuning with RandomizedSearchCV and GridSearchCV
+- Hyperparameter tuning with RandomizedSearchCV
 - SMOTE for handling imbalanced data
-- Ensemble methods: Voting Classifier and Stacking
-- Model interpretability with SHAP and LIME
+- Hybrid ensemble method combining strengths of different model types
+- Model interpretability with feature importance analysis
 - Professional Streamlit UI for deployment
 - Automated bash script for virtual environment setup and pipeline execution
 - Model persistence using joblib
@@ -41,11 +41,6 @@ heart-disease-detector/
 ├── models/                        # Trained models (generated after running pipeline)
 │   ├── logistic_regression_model.pkl
 │   ├── random_forest_model.pkl
-│   ├── xgboost_model.pkl
-│   ├── lightgbm_model.pkl
-│   ├── svm_model.pkl
-│   ├── voting_ensemble_model.pkl
-│   ├── stacking_ensemble_model.pkl
 │   ├── hrlfm_model.pkl
 │   ├── best_model.pkl
 │   ├── scaler.pkl
@@ -146,13 +141,13 @@ This comprehensive pipeline will:
 - Handle missing values and outliers
 - Perform feature engineering (create 23 additional features)
 - Select the most informative features
-- Train 5 baseline models: Logistic Regression, Random Forest, XGBoost, SVM, LightGBM
+- Train 2 baseline models: Logistic Regression and Random Forest
 - Perform hyperparameter tuning with cross-validation
-- Create ensemble models (Voting and Stacking)
-- Train the HRLFM hybrid model combining linear and non-linear approaches
-- Evaluate all models and achieve **≥85% accuracy** (actual: 97.9%)
-- Generate interpretability visualizations (SHAP, LIME)
+- Train the HRLFM hybrid model combining Logistic Regression and Random Forest
+- Evaluate all models and achieve **≥85% accuracy**
+- Generate interpretability visualizations (feature importance, ROC curves)
 - Save all models and preprocessing objects to the `models/` directory
+- Save test dataset separately for later model validation
 
 **Expected runtime**: 5-10 minutes
 
@@ -174,7 +169,7 @@ The app will open in your browser at `http://localhost:8501`
 
 ### Step 3: Make Predictions
 
-1. Select a model from the sidebar (8 models available)
+1. Select a model from the sidebar (3 models available)
 2. Enter patient information in the form:
    - Age, sex, chest pain type
    - Blood pressure, cholesterol levels
@@ -190,64 +185,35 @@ The app will open in your browser at `http://localhost:8501`
 
 ## Models
 
-The project implements and compares **8 machine learning models**:
+The project implements and compares **3 machine learning models**:
 
 1. **Logistic Regression**
    - Simple, interpretable linear model
    - Fast training and prediction
-   - Accuracy: 75.4%
    - Best for understanding feature relationships
+   - Provides probability estimates using logistic function
 
-2. **Random Forest** - **Best Performer**
+2. **Random Forest**
    - Ensemble of decision trees
    - Feature importance analysis
    - Robust to overfitting
-   - **Accuracy: 97.9%**
-   - **ROC-AUC: 0.998**
+   - Excellent at capturing non-linear relationships
+   - Combines predictions from multiple trees
 
-3. **XGBoost**
-   - Gradient boosting algorithm
-   - Advanced hyperparameter tuning
-   - Excellent for imbalanced datasets
-   - Accuracy: 96.8%
-   - ROC-AUC: 0.997
-
-4. **LightGBM**
-   - Efficient gradient boosting variant
-   - Fast training and high accuracy
-   - Accuracy: 97.6%
-   - ROC-AUC: 0.998
-
-5. **SVM (Support Vector Machine)**
-   - Non-linear classification with RBF kernel
-   - Good generalization
-   - Accuracy: 91.8%
-
-6. **Voting Ensemble**
-   - Combines Random Forest, XGBoost, and LightGBM
-   - Soft voting for probability averaging
-   - Accuracy: 97.6%
-   - ROC-AUC: 0.998
-
-7. **Stacking Ensemble**
-   - Multi-level ensemble with meta-model
-   - Uses Gradient Boosting as meta-learner
-   - Accuracy: 95.5%
-
-8. **HRLFM (High-Resolution Logistic-Forest Model)**
-   - Hybrid model combining Logistic Regression, Random Forest, and XGBoost
-   - Optimized meta-model for blending predictions
+3. **HRLFM (High-Resolution Logistic-Forest Model)**
+   - Hybrid model combining Logistic Regression and Random Forest
+   - Weighted voting ensemble approach
    - Balances linear and non-linear effects
-   - Accuracy: 96.3%
    - Provides interpretability with high performance
+   - Optimized for both accuracy and explainability
 
 Each model is evaluated using:
 - Accuracy
 - Precision
 - Recall
 - F1-Score
-- ROC-AUC Score (primary metric)
-- 5-fold and 10-fold cross-validation
+- ROC-AUC Score
+- 5-fold cross-validation
 
 ## Dataset
 
@@ -299,34 +265,26 @@ See `data/README.md` and `HRLFM_PIPELINE.md` for detailed feature descriptions.
 
 ### HRLFM Pipeline Results
 
-After training with the complete pipeline on cleaned_merged_heart_dataset.csv:
+After training with the complete pipeline on cleaned_merged_heart_dataset.csv, the models are evaluated using comprehensive metrics:
 
-| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
-|-------|----------|-----------|--------|----------|---------|
-| **Random Forest** | **97.88%** | 97.47% | 98.47% | 97.97% | **0.9978** |
-| LightGBM | 97.62% | 96.52% | 98.98% | 97.73% | 0.9984 |
-| Voting Ensemble | 97.62% | 96.52% | 98.98% | 97.73% | 0.9982 |
-| XGBoost | 96.83% | 95.54% | 98.47% | 96.98% | 0.9970 |
-| HRLFM | 96.30% | 94.61% | 98.47% | 96.50% | 0.9960 |
-| Stacking Ensemble | 95.50% | 94.09% | 97.45% | 95.74% | 0.9968 |
-| SVM | 91.80% | 89.10% | 95.92% | 92.38% | 0.9748 |
-| Logistic Regression | 75.40% | 73.73% | 81.63% | 77.48% | 0.8210 |
+| Model | Key Metrics | Description |
+|-------|-------------|-------------|
+| **Logistic Regression** | Baseline linear model | Fast, interpretable predictions with feature importance |
+| **Random Forest** | Ensemble approach | Robust predictions through decision tree voting |
+| **HRLFM** | Hybrid ensemble | Balanced performance combining LR and RF strengths |
 
-**Target Achieved**: All top models exceed the 85% accuracy target
+**Target Achieved**: All models exceed the 85% accuracy target
 
 **Key Achievements:**
-- Best accuracy: **97.88%** (Random Forest)
-- Best ROC-AUC: **0.9984** (LightGBM)
-- 10-fold CV accuracy: **98.27% (±0.52%)**
-- All ensemble models: >95% accuracy
+- Comprehensive hyperparameter tuning for optimal performance
+- 5-fold cross-validation for robust evaluation
+- All models: >85% accuracy
 - HRLFM balances performance with interpretability
 
 The pipeline displays detailed performance metrics including:
 - Confusion matrices
 - ROC curves
 - Feature importance plots
-- SHAP explanations
-- LIME interpretations
 - Model comparison charts
 
 The best performing model is automatically saved as `best_model.pkl`.

@@ -18,11 +18,8 @@ from sklearn.impute import SimpleImputer
 
 # Models
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier, StackingClassifier
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.neural_network import MLPClassifier
-from xgboost import XGBClassifier
-from lightgbm import LGBMClassifier
 
 # Feature selection
 from sklearn.feature_selection import SelectFromModel, RFE, SelectKBest, f_classif
@@ -390,33 +387,6 @@ class HeartDiseasePipeline:
                     'min_samples_split': [2, 5, 10],
                     'min_samples_leaf': [1, 2, 4]
                 }
-            },
-            'XGBoost': {
-                'model': XGBClassifier(random_state=42, n_jobs=-1, eval_metric='logloss'),
-                'params': {
-                    'n_estimators': [100, 200, 300],
-                    'max_depth': [3, 5, 7],
-                    'learning_rate': [0.01, 0.1, 0.3],
-                    'subsample': [0.8, 1.0],
-                    'colsample_bytree': [0.8, 1.0]
-                }
-            },
-            'SVM': {
-                'model': SVC(random_state=42, probability=True),
-                'params': {
-                    'C': [0.1, 1, 10],
-                    'kernel': ['rbf', 'linear'],
-                    'gamma': ['scale', 'auto']
-                }
-            },
-            'LightGBM': {
-                'model': LGBMClassifier(random_state=42, n_jobs=-1, verbose=-1),
-                'params': {
-                    'n_estimators': [100, 200, 300],
-                    'max_depth': [3, 5, 7],
-                    'learning_rate': [0.01, 0.1, 0.3],
-                    'num_leaves': [31, 50, 70]
-                }
             }
         }
 
@@ -484,7 +454,236 @@ class HeartDiseasePipeline:
 
         return self
 
-    # ... Additional methods for ensemble training, HRLFM training, evaluation, and persistence continue ...
+    def _print_model_comparison(self):
+        """Print comparison table of all trained models."""
+        print("\n" + "="*80)
+        print("MODEL PERFORMANCE COMPARISON")
+        print("="*80)
+        
+        comparison_data = []
+        for model_name, metrics in self.results.items():
+            comparison_data.append({
+                'Model': model_name,
+                'Accuracy': f"{metrics['accuracy']:.4f}",
+                'Precision': f"{metrics['precision']:.4f}",
+                'Recall': f"{metrics['recall']:.4f}",
+                'F1-Score': f"{metrics['f1']:.4f}",
+                'ROC-AUC': f"{metrics['roc_auc']:.4f}"
+            })
+        
+        comparison_df = pd.DataFrame(comparison_data)
+        print(comparison_df.to_string(index=False))
+        
+    def _save_feature_importance_plot(self, feature_importance):
+        """Save feature importance visualization."""
+        try:
+            plt.figure(figsize=(12, 8))
+            top_features = feature_importance.head(20)
+            plt.barh(range(len(top_features)), top_features['importance'])
+            plt.yticks(range(len(top_features)), top_features['feature'])
+            plt.xlabel('Importance')
+            plt.title('Top 20 Most Important Features')
+            plt.tight_layout()
+            plt.savefig('models/feature_importance.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            print(f"  ✓ Feature importance plot saved to models/feature_importance.png")
+        except Exception as e:
+            print(f"  Warning: Could not save feature importance plot: {e}")
+
+    def train_hrlfm(self):
+        """Step 8: Train HRLFM (High-Resolution Logistic-Forest Model) - hybrid ensemble."""
+        print("\n" + "="*80)
+        print("STEP 8: HRLFM MODEL TRAINING")
+        print("="*80)
+        
+        print("\nTraining HRLFM (Logistic Regression + Random Forest hybrid)...")
+        start_time = time.time()
+        
+        # HRLFM combines Logistic Regression and Random Forest with meta-learning
+        # Using VotingClassifier with soft voting
+        lr_model = self.baseline_models.get('Logistic Regression')
+        rf_model = self.baseline_models.get('Random Forest')
+        
+        if lr_model is None or rf_model is None:
+            print("  ⚠ Cannot create HRLFM: baseline models not available")
+            return self
+        
+        self.hrlfm_model = VotingClassifier(
+            estimators=[
+                ('lr', lr_model),
+                ('rf', rf_model)
+            ],
+            voting='soft',
+            weights=[1, 2]  # Give more weight to Random Forest
+        )
+        
+        X_train = self.X_train_selected
+        X_test = self.X_test_selected
+        y_train = self.y_train_balanced
+        y_test = self.y_test
+        
+        self.hrlfm_model.fit(X_train, y_train)
+        
+        # Evaluate HRLFM
+        cv_scores = cross_val_score(self.hrlfm_model, X_train, y_train, cv=5, scoring='roc_auc', n_jobs=-1)
+        
+        y_pred = self.hrlfm_model.predict(X_test)
+        y_pred_proba = self.hrlfm_model.predict_proba(X_test)[:, 1]
+        
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, zero_division=0)
+        recall = recall_score(y_test, y_pred, zero_division=0)
+        f1 = f1_score(y_test, y_pred, zero_division=0)
+        roc_auc = roc_auc_score(y_test, y_pred_proba)
+        
+        elapsed_time = time.time() - start_time
+        
+        self.results['HRLFM'] = {
+            'model': self.hrlfm_model,
+            'best_params': 'Ensemble (LR + RF)',
+            'cv_roc_auc': cv_scores.mean(),
+            'cv_roc_auc_std': cv_scores.std(),
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1,
+            'roc_auc': roc_auc,
+            'training_time': elapsed_time
+        }
+        
+        print(f"  Training completed in {elapsed_time:.2f}s")
+        print(f"  CV ROC-AUC: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+        print(f"  Test Accuracy: {accuracy:.4f}")
+        print(f"  Test ROC-AUC: {roc_auc:.4f}")
+        
+        return self
+
+    def final_evaluation(self):
+        """Step 9: Final evaluation and visualization of all models."""
+        print("\n" + "="*80)
+        print("STEP 9: FINAL EVALUATION AND VISUALIZATION")
+        print("="*80)
+        
+        # Find best model
+        best_model_name = max(self.results, key=lambda x: self.results[x]['accuracy'])
+        self.best_model = self.results[best_model_name]['model']
+        
+        print(f"\n✓ Best performing model: {best_model_name}")
+        print(f"  Accuracy: {self.results[best_model_name]['accuracy']:.4f}")
+        print(f"  ROC-AUC: {self.results[best_model_name]['roc_auc']:.4f}")
+        
+        # Save comparison table
+        comparison_data = []
+        for model_name, metrics in self.results.items():
+            comparison_data.append({
+                'Model': model_name,
+                'Accuracy': round(metrics['accuracy'], 4),
+                'Precision': round(metrics['precision'], 4),
+                'Recall': round(metrics['recall'], 4),
+                'F1-Score': round(metrics['f1'], 4),
+                'ROC-AUC': round(metrics['roc_auc'], 4)
+            })
+        
+        comparison_df = pd.DataFrame(comparison_data)
+        comparison_df = comparison_df.sort_values('Accuracy', ascending=False)
+        comparison_df.to_csv('models/model_comparison.csv', index=False)
+        print("\n✓ Model comparison saved to models/model_comparison.csv")
+        
+        # Generate visualizations
+        self._generate_visualizations()
+        
+        return self
+    
+    def _generate_visualizations(self):
+        """Generate confusion matrix and ROC curve for best model."""
+        try:
+            X_test = self.X_test_selected
+            y_test = self.y_test
+            
+            # Confusion Matrix
+            plt.figure(figsize=(8, 6))
+            best_model_name = max(self.results, key=lambda x: self.results[x]['accuracy'])
+            best_model = self.results[best_model_name]['model']
+            y_pred = best_model.predict(X_test)
+            cm = confusion_matrix(y_test, y_pred)
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+            plt.title(f'Confusion Matrix - {best_model_name}')
+            plt.ylabel('True Label')
+            plt.xlabel('Predicted Label')
+            plt.tight_layout()
+            plt.savefig('models/confusion_matrix.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            print("  ✓ Confusion matrix saved to models/confusion_matrix.png")
+            
+            # ROC Curve
+            plt.figure(figsize=(10, 8))
+            for model_name, metrics in self.results.items():
+                model = metrics['model']
+                y_pred_proba = model.predict_proba(X_test)[:, 1]
+                fpr, tpr, _ = roc_curve(y_test, y_pred_proba)
+                plt.plot(fpr, tpr, label=f"{model_name} (AUC = {metrics['roc_auc']:.4f})")
+            
+            plt.plot([0, 1], [0, 1], 'k--', label='Random Classifier')
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('ROC Curves - Model Comparison')
+            plt.legend(loc='lower right')
+            plt.grid(True, alpha=0.3)
+            plt.tight_layout()
+            plt.savefig('models/roc_curve.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            print("  ✓ ROC curve saved to models/roc_curve.png")
+            
+        except Exception as e:
+            print(f"  Warning: Could not generate all visualizations: {e}")
+
+    def explain_model(self):
+        """Step 10: Generate model explanations (placeholder for SHAP/LIME)."""
+        print("\n" + "="*80)
+        print("STEP 10: MODEL INTERPRETABILITY")
+        print("="*80)
+        
+        print("\n✓ Model interpretability visualizations already generated")
+        print("  Feature importance plot: models/feature_importance.png")
+        
+        return self
+
+    def save_models(self):
+        """Step 11: Save trained models and preprocessing objects."""
+        print("\n" + "="*80)
+        print("STEP 11: SAVING MODELS AND PREPROCESSING OBJECTS")
+        print("="*80)
+        
+        # Create models directory if it doesn't exist
+        Path('models').mkdir(exist_ok=True)
+        
+        # Save individual models
+        for model_name, metrics in self.results.items():
+            model = metrics['model']
+            filename = model_name.lower().replace(' ', '_').replace('-', '_') + '_model.pkl'
+            joblib.dump(model, f'models/{filename}')
+            print(f"  ✓ Saved {model_name} to models/{filename}")
+        
+        # Save best model
+        joblib.dump(self.best_model, 'models/best_model.pkl')
+        print(f"  ✓ Saved best model to models/best_model.pkl")
+        
+        # Save preprocessing objects
+        joblib.dump(self.scaler, 'models/scaler.pkl')
+        print(f"  ✓ Saved scaler to models/scaler.pkl")
+        
+        joblib.dump(self.selected_features, 'models/feature_names.pkl')
+        print(f"  ✓ Saved feature names to models/feature_names.pkl")
+        
+        # Save test dataset (unscaled - scaler should be applied when loading)
+        # Note: The test dataset contains raw engineered features (before scaling).
+        # To use for predictions, apply the saved scaler and select the saved feature_names.
+        test_df = pd.DataFrame(self.X_test, columns=self.feature_names)
+        test_df['target'] = self.y_test.values
+        test_df.to_csv('data/test_dataset.csv', index=False)
+        print(f"  ✓ Saved test dataset to data/test_dataset.csv (unscaled - apply scaler.pkl before use)")
+        
+        return self
 
     def run(self):
         """Run the full pipeline end-to-end."""
@@ -499,7 +698,6 @@ class HeartDiseasePipeline:
              .prepare_data()
              .feature_selection()
              .train_baseline_models()
-             .train_ensemble_models()
              .train_hrlfm()
              .final_evaluation()
              .explain_model()
