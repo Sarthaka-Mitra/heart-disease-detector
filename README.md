@@ -16,6 +16,7 @@ This project implements the **HRLFM (High-Resolution Logistic-Forest Model)** pi
 - **HRLFM Pipeline** - High-Resolution Logistic-Forest Model combining linear and non-linear approaches
 - Clean, focused repository structure (only essential models)
 - Comprehensive dataset with 1,888 patient records (cleaned_merged_heart_dataset.csv)
+- **Synthetic Data Generation** - CTGAN/SDV-based augmentation to 8,768 rows (see [data/SYNTHESIS_README.md](data/SYNTHESIS_README.md))
 - Advanced feature engineering (23 engineered features: polynomial, interaction, domain-specific)
 - 3 ML models with performance comparison
 - Feature selection using tree-based importance and statistical methods
@@ -36,7 +37,13 @@ heart-disease-detector/
 │
 ├── data/                          # Dataset directory
 │   ├── cleaned_merged_heart_dataset.csv  # HRLFM dataset (1,888 records)
-│   └── README.md                  # Dataset description
+│   ├── synthetic_augmented_heart_dataset.csv  # Augmented dataset (8,768 records)
+│   ├── README.md                  # Dataset description
+│   └── SYNTHESIS_README.md        # Synthetic data generation guide
+│
+├── scripts/                       # Data generation scripts
+│   ├── generate_synthetic_compatible.py  # CTGAN synthetic data generation
+│   └── evaluate_synthetic_and_model.py   # Quality and ML evaluation
 │
 ├── models/                        # Trained models (generated after running pipeline)
 │   ├── logistic_regression_model.pkl
@@ -48,18 +55,24 @@ heart-disease-detector/
 │   ├── model_comparison.csv
 │   └── *.png (visualizations)
 │
+├── reports/                       # Evaluation reports (generated)
+│   ├── synthetic_evaluation.json  # Machine-readable results
+│   └── synthetic_evaluation.txt   # Human-readable summary
+│
 ├── app/                          # Streamlit application
 │   └── streamlit_app.py          # Main application file
 │
 ├── tests/                        # Unit tests
 │   ├── __init__.py
-│   └── test_app.py               # Application tests
+│   ├── test_app.py               # Application tests
+│   └── test_synthetic_generation.py  # Synthetic data tests
 │
 ├── .streamlit/                   # Streamlit configuration
 │   └── config.toml               # App configuration
 │
 ├── requirements.txt              # Python dependencies
 ├── requirements-dev.txt          # Development dependencies
+├── requirements-synthesis.txt    # Synthetic data generation dependencies
 ├── setup.py                      # Package setup
 ├── run_hrlfm_pipeline.sh         # Automated setup & pipeline execution script
 ├── train_hrlfm_pipeline.py       # HRLFM pipeline training script
@@ -326,6 +339,33 @@ docker run -p 8501:8501 heart-disease-predictor
 # Or use docker-compose
 docker-compose up
 ```
+
+## Synthetic Data Generation (Optional)
+
+This project includes tools to augment the dataset from 1,888 to 8,768 rows using CTGAN (Conditional Tabular GAN):
+
+### Quick Start
+
+```bash
+# Install PyTorch CPU and synthesis dependencies
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements-synthesis.txt
+
+# Generate synthetic data (8,768 rows)
+python scripts/generate_synthetic_compatible.py
+
+# Evaluate quality and ML performance
+python scripts/evaluate_synthetic_and_model.py
+```
+
+### What it does
+
+- Trains a CTGAN model on the cleaned dataset
+- Generates 6,880 synthetic rows (fully compatible with original)
+- Evaluates synthetic data quality (SDV metrics)
+- Compares ML model performance (baseline vs augmented)
+
+**See [data/SYNTHESIS_README.md](data/SYNTHESIS_README.md) for detailed instructions.**
 
 ## Deployment
 
