@@ -68,7 +68,7 @@ class HeartDiseasePipeline:
     Organized into clear steps to enable modular processing and easy explanation.
     """
 
-    def __init__(self, data_path='data/synthetic_augmented_heart_dataset.csv', target_accuracy=0.85):
+    def __init__(self, data_path='data/cleaned_merged_heart_dataset.csv', target_accuracy=0.85):
         # Initialize pipeline variables and print start summary
         self.data_path = data_path
         self.target_accuracy = target_accuracy
@@ -730,8 +730,11 @@ class HeartDiseasePipeline:
 
 
 if __name__ == '__main__':
+    # Default to cleaned dataset for reliable ≥85% accuracy
+    # Note: synthetic_augmented_heart_dataset.csv available but achieves only ~75% accuracy
+    # To use synthetic data: set data_path='data/synthetic_augmented_heart_dataset.csv'
     pipeline = HeartDiseasePipeline(
-        data_path='data/synthetic_augmented_heart_dataset.csv',
+        data_path='data/cleaned_merged_heart_dataset.csv',
         target_accuracy=0.85
     )
     pipeline.run()
