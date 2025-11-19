@@ -365,12 +365,63 @@ def main():
         X_baseline, y_baseline, "Cleaned Dataset (Baseline)"
     )
     
-    # Augmented: Synthetic dataset
-    X_augmented = synthetic_df.drop(columns=[target_col])
-    y_augmented = synthetic_df[target_col]
-    augmented_metrics, _ = train_and_evaluate_model(
-        X_augmented, y_augmented, "Synthetic Augmented Dataset"
+    # Prepare augmented data with sample weights (prioritize real data)
+    print("\n" + "-"*60)
+    print("AUGMENTED: Train with sample weighting (real data prioritized)")
+    print("-"*60)
+    
+    # Split original data for fair comparison
+    X_train_clean, X_test_common, y_train_clean, y_test_common = train_test_split(
+        X_baseline, y_baseline, test_size=0.2, random_state=RANDOM_SEED, stratify=y_baseline
     )
+    
+    # Get synthetic-only rows (exclude original 1888 rows)
+    synthetic_only = synthetic_df.iloc[len(cleaned_df):]
+    X_synthetic = synthetic_only.drop(columns=[target_col])
+    y_synthetic = synthetic_only[target_col]
+    
+    # Combine training data
+    X_train_combined = pd.concat([X_train_clean, X_synthetic], ignore_index=True)
+    y_train_combined = pd.concat([y_train_clean, y_synthetic], ignore_index=True)
+    
+    # Create sample weights: real data gets 3x weight vs synthetic
+    sample_weights = np.ones(len(y_train_combined))
+    sample_weights[:len(y_train_clean)] = 3.0  # Real data weight
+    
+    # Scale features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_combined)
+    X_test_scaled = scaler.transform(X_test_common)
+    
+    # Train with sample weights
+    rf_model = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=10,
+        random_state=RANDOM_SEED,
+        n_jobs=-1
+    )
+    rf_model.fit(X_train_scaled, y_train_combined, sample_weight=sample_weights)
+    
+    # Evaluate on common test set
+    y_pred = rf_model.predict(X_test_scaled)
+    y_pred_proba = rf_model.predict_proba(X_test_scaled)[:, 1]
+    
+    augmented_metrics = {
+        'accuracy': accuracy_score(y_test_common, y_pred),
+        'precision': precision_score(y_test_common, y_pred, average='binary'),
+        'recall': recall_score(y_test_common, y_pred, average='binary'),
+        'f1': f1_score(y_test_common, y_pred, average='binary'),
+        'auc': roc_auc_score(y_test_common, y_pred_proba)
+    }
+    
+    print(f"  Training samples: {len(X_train_combined)} ({len(X_train_clean)} real [3x weight] + {len(X_synthetic)} synthetic [1x weight])")
+    print(f"  Test samples: {len(X_test_common)} (same as baseline)")
+    print(f"\n  Results:")
+    print(f"    Accuracy:  {augmented_metrics['accuracy']:.4f}")
+    print(f"    Precision: {augmented_metrics['precision']:.4f}")
+    print(f"    Recall:    {augmented_metrics['recall']:.4f}")
+    print(f"    F1-Score:  {augmented_metrics['f1']:.4f}")
+    print(f"    AUC:       {augmented_metrics['auc']:.4f}")
     
     # Compare performance
     comparison = compare_model_performance(baseline_metrics, augmented_metrics)
