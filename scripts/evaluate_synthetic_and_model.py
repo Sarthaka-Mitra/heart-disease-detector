@@ -96,39 +96,70 @@ def evaluate_data_quality(cleaned_df, synthetic_df):
     
     try:
         from sdmetrics.reports.single_table import QualityReport
+        from sdmetrics.single_table import NewRowSynthesis, KSComplement
         
-        print("\nComputing SDV Quality Report...")
+        print("\nComputing SDV Quality Metrics...")
         
-        # Create quality report
-        report = QualityReport()
-        report.generate(cleaned_df, synthetic_df, verbose=False)
-        
-        # Get overall score
-        overall_score = report.get_score()
-        
-        print(f"\n✓ Overall Quality Score: {overall_score:.4f}")
-        
-        # Get property scores
-        properties = report.get_properties()
-        print("\nProperty Scores:")
-        for prop, score in properties.items():
-            print(f"  {prop}: {score:.4f}")
-        
-        # Get details
-        details = report.get_details()
-        print("\nDetailed Metrics:")
-        print(details.to_string())
-        
-        quality_results = {
-            'overall_score': float(overall_score),
-            'properties': {k: float(v) for k, v in properties.items()},
-            'details': details.to_dict()
-        }
+        # Use individual metrics if QualityReport fails
+        try:
+            # Try newer API with metadata
+            from sdv.metadata import SingleTableMetadata
+            metadata = SingleTableMetadata()
+            metadata.detect_from_dataframe(cleaned_df)
+            
+            report = QualityReport()
+            report.generate(cleaned_df, synthetic_df, metadata.to_dict(), verbose=False)
+            
+            overall_score = report.get_score()
+            properties = report.get_properties()
+            details = report.get_details()
+            
+            print(f"\n✓ Overall Quality Score: {overall_score:.4f}")
+            print("\nProperty Scores:")
+            for prop, score in properties.items():
+                print(f"  {prop}: {score:.4f}")
+            
+            quality_results = {
+                'overall_score': float(overall_score),
+                'properties': {k: float(v) for k, v in properties.items()},
+                'details': details.to_dict()
+            }
+            
+        except Exception as e1:
+            print(f"  QualityReport API failed, using individual metrics: {e1}")
+            
+            # Fallback: use individual metrics
+            column_scores = {}
+            for col in cleaned_df.columns:
+                if cleaned_df[col].dtype in ['int64', 'float64']:
+                    try:
+                        score = KSComplement.compute(
+                            real_data=cleaned_df[col],
+                            synthetic_data=synthetic_df[col]
+                        )
+                        column_scores[col] = float(score)
+                    except:
+                        column_scores[col] = 0.0
+            
+            # Calculate average score
+            overall_score = sum(column_scores.values()) / len(column_scores) if column_scores else 0.0
+            
+            print(f"\n✓ Average KS Complement Score: {overall_score:.4f}")
+            print("\nColumn Scores (KS Complement):")
+            for col, score in column_scores.items():
+                print(f"  {col}: {score:.4f}")
+            
+            quality_results = {
+                'overall_score': float(overall_score),
+                'column_scores': column_scores,
+                'metric': 'KS Complement (higher is better)'
+            }
         
         return quality_results
         
     except Exception as e:
         print(f"✗ Quality evaluation failed: {e}")
+        print("  Continuing without quality metrics...")
         return None
 
 
@@ -254,9 +285,16 @@ def save_results(quality_results, baseline_metrics, augmented_metrics, compariso
             f.write("DATA QUALITY EVALUATION\n")
             f.write("-"*60 + "\n")
             f.write(f"Overall Quality Score: {quality_results['overall_score']:.4f}\n\n")
-            f.write("Property Scores:\n")
-            for prop, score in quality_results['properties'].items():
-                f.write(f"  {prop}: {score:.4f}\n")
+            
+            if 'properties' in quality_results:
+                f.write("Property Scores:\n")
+                for prop, score in quality_results['properties'].items():
+                    f.write(f"  {prop}: {score:.4f}\n")
+            elif 'column_scores' in quality_results:
+                f.write(f"Metric: {quality_results.get('metric', 'Unknown')}\n")
+                f.write("Column Scores:\n")
+                for col, score in quality_results['column_scores'].items():
+                    f.write(f"  {col}: {score:.4f}\n")
             f.write("\n")
         
         # ML evaluation
