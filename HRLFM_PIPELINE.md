@@ -48,7 +48,7 @@ The app provides an interactive interface for:
 
 ## Dataset
 
-**File**: `data/cleaned_merged_heart_dataset.csv`
+**Primary Dataset**: `data/cleaned_merged_heart_dataset.csv`
 
 **Statistics**:
 - Samples: 1,888
@@ -56,6 +56,12 @@ The app provides an interactive interface for:
 - Target: Binary (0 = No Disease, 1 = Disease)
 - Class Distribution: 48% No Disease, 52% Disease (balanced)
 - Missing Values: None
+
+**Synthetic Augmented Dataset** (Optional): `data/synthetic_augmented_heart_dataset.csv`
+- Available for experimentation but achieves only ~75% accuracy
+- Contains 8,768 samples (1,888 real + 6,880 synthetic)
+- Not recommended for production use due to lower model performance
+- See `data/SYNTHESIS_README.md` for details
 
 ### Clinical Features
 
