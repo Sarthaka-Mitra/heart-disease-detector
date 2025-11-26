@@ -1,0 +1,8 @@
+# Data Processing
+streamlit==1.29.0
+pandas>=1.5
+numpy>=1.22
+scikit-learn>=1.0
+
+# Small, focused requirements for deploying the Streamlit app.
+# The full development requirements have been moved to `requirements-full.txt`.
