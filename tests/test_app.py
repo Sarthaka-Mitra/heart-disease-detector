@@ -129,7 +129,7 @@ class TestRiskCategorization(unittest.TestCase):
         risk_level, color_class, icon, text_color, description = self.get_risk_category(0.10)
         self.assertEqual(risk_level, "Very Low Risk")
         self.assertEqual(color_class, "risk-very-low")
-        self.assertEqual(icon, "✅")
+        self.assertEqual(icon, "")
         self.assertEqual(text_color, "#28A745")
         self.assertIn("Minimal", description)
     
@@ -146,7 +146,7 @@ class TestRiskCategorization(unittest.TestCase):
         risk_level, color_class, icon, text_color, description = self.get_risk_category(0.30)
         self.assertEqual(risk_level, "Low Risk")
         self.assertEqual(color_class, "risk-low")
-        self.assertEqual(icon, "✓")
+        self.assertEqual(icon, "")
         self.assertEqual(text_color, "#17A2B8")
         self.assertIn("Low heart disease risk", description)
     
@@ -163,7 +163,7 @@ class TestRiskCategorization(unittest.TestCase):
         risk_level, color_class, icon, text_color, description = self.get_risk_category(0.50)
         self.assertEqual(risk_level, "Moderate Risk")
         self.assertEqual(color_class, "risk-moderate")
-        self.assertEqual(icon, "⚠️")
+        self.assertEqual(icon, "")
         self.assertEqual(text_color, "#FFC107")
         self.assertIn("Moderate heart disease risk", description)
     
@@ -180,7 +180,7 @@ class TestRiskCategorization(unittest.TestCase):
         risk_level, color_class, icon, text_color, description = self.get_risk_category(0.70)
         self.assertEqual(risk_level, "High Risk")
         self.assertEqual(color_class, "risk-high")
-        self.assertEqual(icon, "⚠️")
+        self.assertEqual(icon, "")
         self.assertEqual(text_color, "#DC3545")
         self.assertIn("High heart disease risk", description)
     
@@ -197,7 +197,7 @@ class TestRiskCategorization(unittest.TestCase):
         risk_level, color_class, icon, text_color, description = self.get_risk_category(0.90)
         self.assertEqual(risk_level, "Very High Risk")
         self.assertEqual(color_class, "risk-very-high")
-        self.assertEqual(icon, "🚨")
+        self.assertEqual(icon, "")
         self.assertEqual(text_color, "#C82333")
         self.assertIn("Very high heart disease risk", description)
     

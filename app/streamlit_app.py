@@ -106,15 +106,23 @@ def get_risk_category(disease_probability):
         disease_probability: Float between 0 and 1 representing probability of disease
         
     Returns:
-        tuple: (risk_level, color_class, icon, description)
+        tuple: (risk_level, color_class, icon, text_color, description)
+            - risk_level (str): The risk category name
+            - color_class (str): CSS class for background styling
+            - icon (str): Icon/symbol (empty string if not used)
+            - text_color (str): Hex color code for text styling
+            - description (str): Human-readable description of the risk level
     """
     prob_percent = disease_probability * 100
     
+    # Note: We return both color_class (for background) and text_color (for text)
+    # because Streamlit's custom HTML rendering doesn't always apply CSS classes
+    # to nested elements consistently, so we use inline styles for text color
     if prob_percent <= 20:
         return (
             "Very Low Risk",
             "risk-very-low",
-            "✅",
+            "",
             "#28A745",
             "Minimal heart disease risk detected"
         )
@@ -122,7 +130,7 @@ def get_risk_category(disease_probability):
         return (
             "Low Risk",
             "risk-low",
-            "✓",
+            "",
             "#17A2B8",
             "Low heart disease risk - maintain healthy lifestyle"
         )
@@ -130,7 +138,7 @@ def get_risk_category(disease_probability):
         return (
             "Moderate Risk",
             "risk-moderate",
-            "⚠️",
+            "",
             "#FFC107",
             "Moderate heart disease risk - consider medical consultation"
         )
@@ -138,7 +146,7 @@ def get_risk_category(disease_probability):
         return (
             "High Risk",
             "risk-high",
-            "⚠️",
+            "",
             "#DC3545",
             "High heart disease risk - medical consultation recommended"
         )
@@ -146,7 +154,7 @@ def get_risk_category(disease_probability):
         return (
             "Very High Risk",
             "risk-very-high",
-            "🚨",
+            "",
             "#C82333",
             "Very high heart disease risk - urgent medical consultation required"
         )
@@ -437,9 +445,11 @@ with tab1:
                 col1, col2 = st.columns(2)
 
                 with col1:
+                    # Build the heading with icon only if present
+                    heading_text = f"{icon} {risk_level}" if icon else risk_level
                     st.markdown(
                         f'<div class="prediction-box {color_class}">'
-                        f'<h2 style="color: {text_color}; text-align: center;">{icon} {risk_level}</h2>'
+                        f'<h2 style="color: {text_color}; text-align: center;">{heading_text}</h2>'
                         f'<p style="text-align: center; font-size: 1.2rem;">{description}</p>'
                         f'<p style="text-align: center; font-size: 1.5rem; font-weight: bold; color: {text_color}; margin-top: 1rem;">'
                         f'Disease Probability: {disease_prob*100:.1f}%</p>'
