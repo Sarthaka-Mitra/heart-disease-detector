@@ -115,5 +115,102 @@ class TestStreamlitApp(unittest.TestCase):
             self.fail(f"Failed to import streamlit_app: {str(e)}")
 
 
+class TestRiskCategorization(unittest.TestCase):
+    """Test risk categorization function"""
+    
+    def setUp(self):
+        """Set up test fixtures"""
+        sys.path.insert(0, str(project_root / 'app'))
+        from streamlit_app import get_risk_category
+        self.get_risk_category = get_risk_category
+    
+    def test_very_low_risk_category(self):
+        """Test very low risk category (0-20%)"""
+        risk_level, color_class, icon, text_color, description = self.get_risk_category(0.10)
+        self.assertEqual(risk_level, "Very Low Risk")
+        self.assertEqual(color_class, "risk-very-low")
+        self.assertEqual(icon, "")
+        self.assertEqual(text_color, "#28A745")
+        self.assertIn("Minimal", description)
+    
+    def test_very_low_risk_boundary(self):
+        """Test very low risk boundary at 20%"""
+        risk_level, _, _, _, _ = self.get_risk_category(0.20)
+        self.assertEqual(risk_level, "Very Low Risk")
+        
+        risk_level, _, _, _, _ = self.get_risk_category(0.21)
+        self.assertEqual(risk_level, "Low Risk")
+    
+    def test_low_risk_category(self):
+        """Test low risk category (21-40%)"""
+        risk_level, color_class, icon, text_color, description = self.get_risk_category(0.30)
+        self.assertEqual(risk_level, "Low Risk")
+        self.assertEqual(color_class, "risk-low")
+        self.assertEqual(icon, "")
+        self.assertEqual(text_color, "#17A2B8")
+        self.assertIn("Low heart disease risk", description)
+    
+    def test_low_risk_boundary(self):
+        """Test low risk boundary at 40%"""
+        risk_level, _, _, _, _ = self.get_risk_category(0.40)
+        self.assertEqual(risk_level, "Low Risk")
+        
+        risk_level, _, _, _, _ = self.get_risk_category(0.41)
+        self.assertEqual(risk_level, "Moderate Risk")
+    
+    def test_moderate_risk_category(self):
+        """Test moderate risk category (41-60%)"""
+        risk_level, color_class, icon, text_color, description = self.get_risk_category(0.50)
+        self.assertEqual(risk_level, "Moderate Risk")
+        self.assertEqual(color_class, "risk-moderate")
+        self.assertEqual(icon, "")
+        self.assertEqual(text_color, "#FFC107")
+        self.assertIn("Moderate heart disease risk", description)
+    
+    def test_moderate_risk_boundary(self):
+        """Test moderate risk boundary at 60%"""
+        risk_level, _, _, _, _ = self.get_risk_category(0.60)
+        self.assertEqual(risk_level, "Moderate Risk")
+        
+        risk_level, _, _, _, _ = self.get_risk_category(0.61)
+        self.assertEqual(risk_level, "High Risk")
+    
+    def test_high_risk_category(self):
+        """Test high risk category (61-80%)"""
+        risk_level, color_class, icon, text_color, description = self.get_risk_category(0.70)
+        self.assertEqual(risk_level, "High Risk")
+        self.assertEqual(color_class, "risk-high")
+        self.assertEqual(icon, "")
+        self.assertEqual(text_color, "#DC3545")
+        self.assertIn("High heart disease risk", description)
+    
+    def test_high_risk_boundary(self):
+        """Test high risk boundary at 80%"""
+        risk_level, _, _, _, _ = self.get_risk_category(0.80)
+        self.assertEqual(risk_level, "High Risk")
+        
+        risk_level, _, _, _, _ = self.get_risk_category(0.81)
+        self.assertEqual(risk_level, "Very High Risk")
+    
+    def test_very_high_risk_category(self):
+        """Test very high risk category (81-100%)"""
+        risk_level, color_class, icon, text_color, description = self.get_risk_category(0.90)
+        self.assertEqual(risk_level, "Very High Risk")
+        self.assertEqual(color_class, "risk-very-high")
+        self.assertEqual(icon, "")
+        self.assertEqual(text_color, "#C82333")
+        self.assertIn("Very high heart disease risk", description)
+    
+    def test_edge_cases(self):
+        """Test edge cases for risk categorization"""
+        # Test 0% (minimum)
+        risk_level, _, _, _, _ = self.get_risk_category(0.0)
+        self.assertEqual(risk_level, "Very Low Risk")
+        
+        # Test 100% (maximum)
+        risk_level, _, _, _, _ = self.get_risk_category(1.0)
+        self.assertEqual(risk_level, "Very High Risk")
+
+
 if __name__ == '__main__':
     unittest.main()

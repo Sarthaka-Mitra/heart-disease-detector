@@ -36,13 +36,25 @@ st.markdown("""
         border-radius: 10px;
         margin: 1rem 0;
     }
-    .healthy {
-        background-color: #D5F4E6;
-        border: 2px solid #27AE60;
+    .risk-very-low {
+        background-color: #D4EDDA;
+        border: 2px solid #28A745;
     }
-    .at-risk {
-        background-color: #FADBD8;
-        border: 2px solid #E74C3C;
+    .risk-low {
+        background-color: #D1ECF1;
+        border: 2px solid #17A2B8;
+    }
+    .risk-moderate {
+        background-color: #FFF3CD;
+        border: 2px solid #FFC107;
+    }
+    .risk-high {
+        background-color: #F8D7DA;
+        border: 2px solid #DC3545;
+    }
+    .risk-very-high {
+        background-color: #F5C6CB;
+        border: 2px solid #C82333;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -84,6 +96,68 @@ def load_models():
         st.warning(f"Preprocessing objects not fully loaded: {e}")
     
     return models, scaler, feature_names
+
+
+def get_risk_category(disease_probability):
+    """
+    Categorize disease probability into risk levels.
+    
+    Args:
+        disease_probability: Float between 0.0 and 1.0 representing probability of disease
+        
+    Returns:
+        tuple: (risk_level, color_class, icon, text_color, description)
+            - risk_level (str): The risk category name
+            - color_class (str): CSS class for background styling
+            - icon (str): Icon/symbol (empty string if not used)
+            - text_color (str): Hex color code for text styling
+            - description (str): Human-readable description of the risk level
+    """
+    prob_percent = disease_probability * 100
+    
+    # Note: We return both color_class (for background) and text_color (for text)
+    # because Streamlit's custom HTML rendering doesn't always apply CSS classes
+    # to nested elements consistently, so we use inline styles for text color
+    if prob_percent <= 20:
+        return (
+            "Very Low Risk",
+            "risk-very-low",
+            "",
+            "#28A745",
+            "Minimal heart disease risk detected"
+        )
+    elif prob_percent <= 40:
+        return (
+            "Low Risk",
+            "risk-low",
+            "",
+            "#17A2B8",
+            "Low heart disease risk - maintain healthy lifestyle"
+        )
+    elif prob_percent <= 60:
+        return (
+            "Moderate Risk",
+            "risk-moderate",
+            "",
+            "#FFC107",
+            "Moderate heart disease risk - consider medical consultation"
+        )
+    elif prob_percent <= 80:
+        return (
+            "High Risk",
+            "risk-high",
+            "",
+            "#DC3545",
+            "High heart disease risk - medical consultation recommended"
+        )
+    else:
+        return (
+            "Very High Risk",
+            "risk-very-high",
+            "",
+            "#C82333",
+            "Very high heart disease risk - urgent medical consultation required"
+        )
 
 
 def prepare_batch_inputs(df_input, scaler, feature_names):
@@ -316,6 +390,11 @@ with tab1:
                 df_display['prediction'] = preds
                 df_display['prob_no_disease'] = prob[:, 0]
                 df_display['prob_disease'] = prob[:, 1]
+                
+                # Add risk category column
+                df_display['risk_category'] = df_display['prob_disease'].apply(
+                    lambda x: get_risk_category(x)[0]
+                )
 
                 st.markdown("### Batch Prediction Results")
                 st.dataframe(df_display, use_container_width=True)
@@ -358,25 +437,23 @@ with tab1:
 
                 # Display results
                 st.markdown("### 🎯 Prediction Results")
+                
+                # Get risk category based on disease probability
+                disease_prob = probability[1]
+                risk_level, color_class, icon, text_color, description = get_risk_category(disease_prob)
+                
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    if int(prediction[0]) == 0:
-                        st.markdown(
-                            '<div class="prediction-box healthy">'
-                            '<h2 style="color: #27AE60; text-align: center;">✅ Low Risk</h2>'
-                            '<p style="text-align: center; font-size: 1.2rem;">No significant heart disease risk detected</p>'
-                            '</div>',
-                            unsafe_allow_html=True
-                        )
-                    else:
-                        st.markdown(
-                            '<div class="prediction-box at-risk">'
-                            '<h2 style="color: #E74C3C; text-align: center;">⚠️ High Risk</h2>'
-                            '<p style="text-align: center; font-size: 1.2rem;">Heart disease risk detected - Please consult a healthcare professional</p>'
-                            '</div>',
-                            unsafe_allow_html=True
-                        )
+                    st.markdown(
+                        f'<div class="prediction-box {color_class}">'
+                        f'<h2 style="color: {text_color}; text-align: center;">{risk_level}</h2>'
+                        f'<p style="text-align: center; font-size: 1.2rem;">{description}</p>'
+                        f'<p style="text-align: center; font-size: 1.5rem; font-weight: bold; color: {text_color}; margin-top: 1rem;">'
+                        f'Disease Probability: {disease_prob*100:.1f}%</p>'
+                        '</div>',
+                        unsafe_allow_html=True
+                    )
 
                 with col2:
                     st.markdown("#### Probability Breakdown")
