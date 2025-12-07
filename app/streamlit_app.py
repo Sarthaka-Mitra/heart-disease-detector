@@ -103,7 +103,7 @@ def get_risk_category(disease_probability):
     Categorize disease probability into risk levels.
     
     Args:
-        disease_probability: Float between 0 and 1 representing probability of disease
+        disease_probability: Float between 0.0 and 1.0 representing probability of disease
         
     Returns:
         tuple: (risk_level, color_class, icon, text_color, description)
@@ -445,11 +445,9 @@ with tab1:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    # Build the heading with icon only if present
-                    heading_text = f"{icon} {risk_level}" if icon else risk_level
                     st.markdown(
                         f'<div class="prediction-box {color_class}">'
-                        f'<h2 style="color: {text_color}; text-align: center;">{heading_text}</h2>'
+                        f'<h2 style="color: {text_color}; text-align: center;">{risk_level}</h2>'
                         f'<p style="text-align: center; font-size: 1.2rem;">{description}</p>'
                         f'<p style="text-align: center; font-size: 1.5rem; font-weight: bold; color: {text_color}; margin-top: 1rem;">'
                         f'Disease Probability: {disease_prob*100:.1f}%</p>'
