@@ -75,8 +75,8 @@ def load_models():
             models['Logistic Regression'] = joblib.load(model_path / 'logistic_regression_model.pkl')
         if (model_path / 'random_forest_model.pkl').exists():
             models['Random Forest'] = joblib.load(model_path / 'random_forest_model.pkl')
-        if (model_path / 'HRLFM_model.pkl').exists():
-            models['HRLFM'] = joblib.load(model_path / 'HRLFM_model.pkl')
+        if (model_path / 'hrlfm_model.pkl').exists():
+            models['HRLFM'] = joblib.load(model_path / 'hrlfm_model.pkl')
         if (model_path / 'best_model.pkl').exists():
             models['Best Model'] = joblib.load(model_path / 'best_model.pkl')
     except Exception as e:
