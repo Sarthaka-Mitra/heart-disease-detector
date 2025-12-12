@@ -442,7 +442,7 @@ with tab2:
             with viz_col1:
                 if (model_path / 'confusion_matrix_2.png').exists():
                     st.markdown("**Confusion Matrix**")
-                    st.image(str(model_path / 'confusion_matrix.png'), use_column_width=True)
+                    st.image(str(model_path / 'confusion_matrix_2.png'), use_column_width=True)
             
             with viz_col2:
                 if (model_path / 'roc_curve.png').exists():
