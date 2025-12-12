@@ -63,8 +63,8 @@ def load_models():
             models['Logistic Regression'] = joblib.load(model_path / 'logistic_regression_model.pkl')
         if (model_path / 'random_forest_model.pkl').exists():
             models['Random Forest'] = joblib.load(model_path / 'random_forest_model.pkl')
-        if (model_path / 'hrlfm_model.pkl').exists():
-            models['HRLFM'] = joblib.load(model_path / 'hrlfm_model.pkl')
+        if (model_path / 'HRFLM_model.pkl').exists():
+            models['HRFLM'] = joblib.load(model_path / 'HRFLM_model.pkl')
         if (model_path / 'best_model.pkl').exists():
             models['Best Model'] = joblib.load(model_path / 'best_model.pkl')
     except Exception as e:
@@ -103,13 +103,13 @@ if models:
     st.sidebar.info(
         "This application predicts the likelihood of heart disease based on various clinical parameters. "
         "The models were trained on the cleaned merged heart disease dataset with 8,768 patient records using "
-        "advanced ML techniques including HRLFM (High-Resolution Logistic-Forest Model)."
+        "advanced ML techniques including HRFLM (High-Resolution Logistic-Forest Model)."
     )
     
     st.sidebar.markdown("### 🎯 Model Info")
     st.sidebar.success(f"Currently using: **{selected_model_name}**")
 else:
-    st.error("No models found. Please run the training script first: `python train_hrlfm_pipeline.py`")
+    st.error("No models found. Please run the training script first: `python train_HRFLM_pipeline.py`")
     st.stop()
 
 # Main content
@@ -560,7 +560,7 @@ with tab2:
     2. **Random Forest**: Robust ensemble method combining multiple decision trees. Excellent performance 
        through averaging predictions and reducing overfitting. Strong at capturing non-linear relationships.
     
-    3. **HRLFM (High-Resolution Logistic-Forest Model)**: Hybrid approach combining Logistic Regression 
+    3. **HRFLM (High-Resolution Logistic-Forest Model)**: Hybrid approach combining Logistic Regression 
        and Random Forest through ensemble voting. Balances linear interpretability with non-linear 
        predictive power for robust, explainable predictions.
     
@@ -643,14 +643,14 @@ with tab3:
        multiple decision trees using random subsets of features and data, then averages their 
        predictions. Robust and handles non-linear relationships well.
     
-    3. **HRLFM (High-Resolution Logistic-Forest Model)**: Hybrid ensemble combining Logistic 
+    3. **HRFLM (High-Resolution Logistic-Forest Model)**: Hybrid ensemble combining Logistic 
        Regression and Random Forest. Uses weighted voting to balance linear interpretability 
        with non-linear predictive power, providing both accuracy and explainability.
     
     #### Model Performance:
     - All models achieved >75% accuracy
     - Models were trained with hyperparameter tuning
-    - HRLFM provides balanced performance with high interpretability
+    - HRFLM provides balanced performance with high interpretability
     - Cross-validated to ensure robust performance
     """)
     
