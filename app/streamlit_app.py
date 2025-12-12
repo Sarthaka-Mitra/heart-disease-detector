@@ -75,8 +75,8 @@ def load_models():
             models['Logistic Regression'] = joblib.load(model_path / 'logistic_regression_model.pkl')
         if (model_path / 'random_forest_model.pkl').exists():
             models['Random Forest'] = joblib.load(model_path / 'random_forest_model.pkl')
-        if (model_path / 'hrlfm_model.pkl').exists():
-            models['HRLFM'] = joblib.load(model_path / 'hrlfm_model.pkl')
+        if (model_path / 'HRFLM_model.pkl').exists():
+            models['HRFLM'] = joblib.load(model_path / 'HRFLM_model.pkl')
         if (model_path / 'best_model.pkl').exists():
             models['Best Model'] = joblib.load(model_path / 'best_model.pkl')
     except Exception as e:
@@ -251,14 +251,14 @@ if models:
     st.sidebar.markdown("### 📊 About")
     st.sidebar.info(
         "This application predicts the likelihood of heart disease based on various clinical parameters. "
-        "The models were trained on the cleaned merged heart disease dataset with 1,888 patient records using "
-        "advanced ML techniques including HRLFM (High-Resolution Logistic-Forest Model)."
+        "The models were trained on the cleaned merged heart disease dataset with 8,768 patient records using "
+        "advanced ML techniques including HRFLM (High-Resolution Logistic-Forest Model)."
     )
     
     st.sidebar.markdown("### 🎯 Model Info")
     st.sidebar.success(f"Currently using: **{selected_model_name}**")
 else:
-    st.error("No models found. Please run the training script first: `python train_hrlfm_pipeline.py`")
+    st.error("No models found. Please run the training script first: `python train_HRFLM_pipeline.py`")
     st.stop()
 
 # Main content
@@ -664,13 +664,13 @@ with tab2:
     2. **Random Forest**: Robust ensemble method combining multiple decision trees. Excellent performance 
        through averaging predictions and reducing overfitting. Strong at capturing non-linear relationships.
     
-    3. **HRLFM (High-Resolution Logistic-Forest Model)**: Hybrid approach combining Logistic Regression 
+    3. **HRFLM (High-Resolution Logistic-Forest Model)**: Hybrid approach combining Logistic Regression 
        and Random Forest through ensemble voting. Balances linear interpretability with non-linear 
        predictive power for robust, explainable predictions.
     
     ### Training Details:
     
-    - **Dataset**: 1,888 patient records from cleaned merged heart disease dataset
+    - **Dataset**: 8,768 patient records from cleaned merged heart disease dataset
     - **Features**: 13 original + 23 engineered = 36 selected features
     - **Cross-Validation**: 5-fold stratified cross-validation
     - **Hyperparameter Tuning**: RandomizedSearchCV
@@ -685,7 +685,7 @@ with tab3:
     st.markdown("""
     #### Features Description:
     
-    This model was trained on the **cleaned merged heart disease dataset** containing 1,888 patient records 
+    This model was trained on the **cleaned merged heart disease dataset** containing 8,768 patient records 
     with 14 clinical features.
     
     **Clinical Features:**
@@ -731,7 +731,7 @@ with tab3:
     - **target**: Heart disease diagnosis (0 = No disease, 1 = Disease)
     
     #### Dataset Statistics:
-    - Total samples: 1,888
+    - Total samples: 8,768
     - Original features: 13
     - Engineered features: 36 (after feature engineering and selection)
     - Class distribution: Approximately 48% No Disease, 52% Disease
@@ -747,14 +747,14 @@ with tab3:
        multiple decision trees using random subsets of features and data, then averages their 
        predictions. Robust and handles non-linear relationships well.
     
-    3. **HRLFM (High-Resolution Logistic-Forest Model)**: Hybrid ensemble combining Logistic 
+    3. **HRFLM (High-Resolution Logistic-Forest Model)**: Hybrid ensemble combining Logistic 
        Regression and Random Forest. Uses weighted voting to balance linear interpretability 
        with non-linear predictive power, providing both accuracy and explainability.
     
     #### Model Performance:
     - All models achieved >75% accuracy
     - Models were trained with hyperparameter tuning
-    - HRLFM provides balanced performance with high interpretability
+    - HRFLM provides balanced performance with high interpretability
     - Cross-validated to ensure robust performance
     """)
     
