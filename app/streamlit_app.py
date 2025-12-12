@@ -102,7 +102,7 @@ if models:
     st.sidebar.markdown("### 📊 About")
     st.sidebar.info(
         "This application predicts the likelihood of heart disease based on various clinical parameters. "
-        "The models were trained on the cleaned merged heart disease dataset with 1,888 patient records using "
+        "The models were trained on the cleaned merged heart disease dataset with 8,768 patient records using "
         "advanced ML techniques including HRLFM (High-Resolution Logistic-Forest Model)."
     )
     
@@ -566,7 +566,7 @@ with tab2:
     
     ### Training Details:
     
-    - **Dataset**: 1,888 patient records from cleaned merged heart disease dataset
+    - **Dataset**: 8,768 patient records from cleaned merged heart disease dataset
     - **Features**: 13 original + 23 engineered = 36 selected features
     - **Cross-Validation**: 5-fold stratified cross-validation
     - **Hyperparameter Tuning**: RandomizedSearchCV
@@ -581,7 +581,7 @@ with tab3:
     st.markdown("""
     #### Features Description:
     
-    This model was trained on the **cleaned merged heart disease dataset** containing 1,888 patient records 
+    This model was trained on the **cleaned merged heart disease dataset** containing 8,768 patient records 
     with 14 clinical features.
     
     **Clinical Features:**
@@ -627,7 +627,7 @@ with tab3:
     - **target**: Heart disease diagnosis (0 = No disease, 1 = Disease)
     
     #### Dataset Statistics:
-    - Total samples: 1,888
+    - Total samples: 8,768
     - Original features: 13
     - Engineered features: 36 (after feature engineering and selection)
     - Class distribution: Approximately 48% No Disease, 52% Disease
