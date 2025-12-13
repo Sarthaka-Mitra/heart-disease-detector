@@ -2,12 +2,12 @@
 
 ## Overview
 This directory contains the heart disease dataset used by the HRLFM (High-Resolution Logistic-Forest Model) pipeline:
-- **cleaned_merged_heart_dataset.csv**: Cleaned and merged dataset with 1,888 patient records
+- **cleaned_merged_heart_dataset.csv**: Cleaned and merged dataset with 8,768 patient records
 
 ## HRLFM Dataset: cleaned_merged_heart_dataset.csv
 
 ### Overview
-This dataset contains 1,888 patient records with 13 clinical features used to predict the presence of heart disease. The dataset is cleaned, merged from multiple sources, and optimized for the HRLFM machine learning pipeline.
+This dataset contains 8,768 patient records with 13 clinical features used to predict the presence of heart disease. The dataset is cleaned, merged from multiple sources, and optimized for the HRLFM machine learning pipeline.
 
 ### Clinical Features
 
@@ -49,7 +49,7 @@ This dataset contains 1,888 patient records with 13 clinical features used to pr
 
 ### Dataset Characteristics
 
-- **Total samples**: 1,888
+- **Total samples**: 8,768
 - **Training samples**: ~1,510 (80%)
 - **Test samples**: ~378 (20%) - saved separately as test_dataset.csv
 - **Original features**: 13
